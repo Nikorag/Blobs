@@ -21,9 +21,11 @@ Your game server will be available on port 3000
 
 ## Message Channels
 
-| Channel | Payload | Purpose |
-|--|--|--|
-| playerUpdate |playerUpdate | Inform the clients of the current status of each player |
+| Channel | source | Payload | Purpose |
+|--|--|--|--|
+| playerUpdate | server | playerUpdate | Inform the clients of the current status of each player |
+| whatIsYourName | server | EMPTY | Inform the client to open the change name modal |
+| nameChange | client | String | Informs the server to change the players name |
 
 ## Payloads
 
