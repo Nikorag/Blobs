@@ -26,5 +26,10 @@ module.exports = {
 
   getPlayer: function(id){
     return players.filter(player => player.socketId == id)[0];
+  },
+
+  updatePlayerName: function(id, name){
+    var player = module.exports.getPlayer(id);
+    player.name = name;
   }
 };

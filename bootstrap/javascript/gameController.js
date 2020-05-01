@@ -7,4 +7,12 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
     $rootScope.$emit("playerUpdate", playerUpdate);
   });
 
+  socket.on("whatIsYourName", function(){
+    $('#nameChangeModal').modal();
+    $('#nameChangeModal').on('shown.bs.modal', function () {
+      $('#newNameInput').trigger('focus')
+    })
+    $rootScope.$emit("whatIsYourName", {});
+  });
+
 }]);
