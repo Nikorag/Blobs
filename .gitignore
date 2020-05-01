@@ -107,3 +107,5 @@ dist
 public/stylesheets/*.css
 public/javascript/*.js
 public/javascript/*.js.map
+
+package-lock.json
