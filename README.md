@@ -16,5 +16,5 @@ After cloning/downloading the project install it using
     npm install
 Then run the project using
 
-    npm run
+    npm start
 Your game server will be available on port 3000

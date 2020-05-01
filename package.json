@@ -4,7 +4,8 @@
   "description": "Recreation of the card-game Blobs to be played multiplayer in a browser.",
   "main": "blobs.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "grunt && node ./blobs.js"
   },
   "repository": {
     "type": "git",
@@ -20,5 +21,14 @@
   "bugs": {
     "url": "https://github.com/Nikorag/Blobs/issues"
   },
-  "homepage": "https://github.com/Nikorag/Blobs#readme"
+  "homepage": "https://github.com/Nikorag/Blobs#readme",
+  "dependencies": {
+    "grunt": "^1.1.0",
+    "grunt-contrib-clean": "^2.0.0",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-cssmin": "^3.0.0",
+    "grunt-contrib-less": "^2.0.0",
+    "grunt-contrib-uglify": "^4.0.1",
+    "grunt-contrib-watch": "^1.1.0"
+  }
 }
