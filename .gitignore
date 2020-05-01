@@ -106,3 +106,4 @@ dist
 # Public JS and CSS
 public/stylesheets/*.css
 public/javascript/*.js
+public/javascript/*.js.map
