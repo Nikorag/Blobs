@@ -62,11 +62,11 @@ module.exports = function(grunt) {
     watch: {
       less: {
         files: ['bootstrap/less/*.less'],
-        tasks: ['less'],
+        tasks: ['less', 'cssmin', 'clean:after'],
       },
       javascript: {
         files: ['bootstrap/javascript/*.js'],
-        tasks: ['concat', 'uglify:development'],
+        tasks: ['babel', 'concat', 'uglify:development', 'clean:after'],
       }
     }
   });
