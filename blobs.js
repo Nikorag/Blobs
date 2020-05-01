@@ -4,6 +4,7 @@ var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 //Services
 var playerService = require("./service/player_service");
+var messageService = require("./service/message_service");
 
 //Give static access to public directory
 app.use(express.static('public'));
@@ -19,17 +20,14 @@ http.listen(3000, () => {
 
 io.on('connection', (socket) => {
 
-  //Let the client know their Socket ID
-  io.to(socket.id).emit('yourSocket', socket.id);
-
   //When a player connects, add that player and then emit a "playerUpdate" event to each player
   playerService.createPlayer(socket.id);
-  io.emit('playerUpdate', playerService.getPlayers());
+  messageService.sendPlayerUpdate(io);
 
   //If they subsequently disconnect, remove them and emit another "playerUpdate" event to each player
   socket.on('disconnect', () => {
     playerService.removePlayer(socket.id);
-    io.emit('playerUpdate', playerService.getPlayers());
+    messageService.sendPlayerUpdate(io);
   });
 
 });

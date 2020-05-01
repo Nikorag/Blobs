@@ -13,5 +13,6 @@
   <body ng-app="blobs" ng-controller="gameController">
       <h1>Blobs Game</h1>
       <h2>My Socket ID is {{mySocket}}</h2>
+      <div ng-controller="playerController" class="playerPanel" ng-include="'templates/panels/playerPanel.html'"></div>
   </body>
 </html>
