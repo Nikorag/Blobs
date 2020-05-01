@@ -1,0 +1,24 @@
+{
+  "name": "blobs",
+  "version": "1.0.0",
+  "description": "Recreation of the card-game Blobs to be played multiplayer in a browser.",
+  "main": "blobs.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nikorag/Blobs.git"
+  },
+  "keywords": [
+    "Cards",
+    "Trumps",
+    "Blobs"
+  ],
+  "author": "Jamie & Paul Bartlett",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nikorag/Blobs/issues"
+  },
+  "homepage": "https://github.com/Nikorag/Blobs#readme"
+}
