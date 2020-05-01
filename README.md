@@ -18,3 +18,8 @@ Then run the project using
 
     npm start
 Your game server will be available on port 3000
+
+| Channel | Payload | Purpose |
+|--|--|--|
+| yourSocket | String | Inform the client of their socket ID |
+| playerUpdate | Array of Players | Inform the clients of the current status of each player |
