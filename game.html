@@ -1,10 +1,17 @@
 <html>
   <head>
       <title>Blobs Game</title>
+      <!-- StyleSheets -->
       <link rel="stylesheet" href="stylesheets/main.min.css"/>
+
+      <!-- Javascripts -->
+      <script src="/socket.io/socket.io.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/angularjs-socket-io@0.7.0/socket.min.js"></script>
       <script src="javascript/main.min.js"></script>
   </head>
-  <body>
+  <body ng-app="blobs" ng-controller="gameController">
       <h1>Blobs Game</h1>
+      <h2>My Socket ID is {{mySocket}}</h2>
   </body>
 </html>

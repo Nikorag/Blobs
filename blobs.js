@@ -14,3 +14,12 @@ app.get('/', (req, res) => {
 http.listen(3000, () => {
   console.log("listening on 3000");
 });
+
+io.on('connection', (socket) => {
+
+  console.log("Client connected - "+socket.id);
+
+  //Let the client know their Socket ID
+  io.to(socket.id).emit('yourSocket', socket.id);
+
+});
