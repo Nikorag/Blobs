@@ -1,7 +1,14 @@
 <h2>Players</h2>
 <ul class="playerList">
-  <li ng-repeat="player in players">
-    {{player.name}}
+  <li ng-repeat="player in players" class="row">
+    <div class="col-8">
+      {{player.name}}
+    </div>
+    <div class="col-4">
+      <button ng-if="player.socketId == myPlayer.socketId" type="button" class="btn btn-primary" data-toggle="modal" data-target="#nameChangeModal">
+        Rename
+      </button>
+    </div>
   </li>
 </ul>
-<button ng-if="players.length > 1" type="button" class="startGameButton btn btn-primary">We're All Here</button>
+<button ng-if="players.length > 1" type="button" class="startGameButton btn btn-success">We're All Here</button>
