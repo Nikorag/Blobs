@@ -4,7 +4,7 @@
   "description": "Recreation of the card-game Blobs to be played multiplayer in a browser.",
   "main": "blobs.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha",
     "start": "grunt && node ./blobs.js"
   },
   "repository": {
@@ -34,6 +34,7 @@
     "grunt-contrib-less": "^2.0.0",
     "grunt-contrib-uglify": "^4.0.1",
     "grunt-contrib-watch": "^1.1.0",
+    "mocha": "^7.1.2",
     "socket.io": "^2.3.0"
   }
 }
