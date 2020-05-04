@@ -1,6 +1,7 @@
 //The main controller for the game
 angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 'socket', function($rootScope, $scope, socket){
   $scope.mySocket = "";
+  $scope.gameStarted = false;
 
   socket.on("playerUpdate", function(playerUpdate){
     $scope.mySocket = playerUpdate.myPlayer.socketId;
@@ -13,6 +14,15 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
       $('#newNameInput').trigger('focus')
     })
     $rootScope.$emit("whatIsYourName", {});
+  });
+
+  socket.on("startGame", function(){
+    $rootScope.$emit("startGame", {});
+    $scope.gameStarted = true;
+  });
+
+  socket.on("initiateCountDown", function(seconds){
+    startCountdown(seconds);
   });
 
 }]);

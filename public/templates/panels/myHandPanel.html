@@ -1,0 +1,7 @@
+<div ng-if="gameStarted">
+    <ul>
+        <li ng-repeat="card in myPlayer.hand" class="cardItem">
+            <img class="card_in_hand" src="https://raw.githubusercontent.com/hayeah/playing-cards-assets/master/svg-cards/{{card.label}}_of_{{card.suit.name}}.svg"/>
+        </li>
+    </ul>
+</div>

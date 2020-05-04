@@ -5,10 +5,10 @@
       {{player.name}}
     </div>
     <div class="col-4">
-      <button ng-if="player.socketId == myPlayer.socketId" type="button" class="btn btn-primary" data-toggle="modal" data-target="#nameChangeModal">
+      <button ng-if="player.socketId == myPlayer.socketId && !gameStarted" type="button" class="btn btn-primary" data-toggle="modal" data-target="#nameChangeModal">
         Rename
       </button>
     </div>
   </li>
 </ul>
-<button ng-if="players.length > 1" type="button" class="startGameButton btn btn-success">We're All Here</button>
+<button ng-if="players.length > 1 && !gamestarted" type="button" ng-click="startGame()" class="startGameButton btn btn-success">We're All Here</button>

@@ -5,6 +5,14 @@ var io = require('socket.io')(http);
 //Services
 var playerService = require("./service/player_service");
 var messageService = require("./service/message_service");
+var cardService = require("./service/card_service");
+
+//Create some constants
+const WAIT_TIME = 5;
+const STARTING_CARDS = 7;
+
+//Create the game_object
+var gameObject = {};
 
 //Give static access to public directory
 app.use(express.static('public'));
@@ -38,5 +46,26 @@ io.on('connection', (socket) => {
     playerService.updatePlayerName(socket.id, newName);
     messageService.sendPlayerUpdate(io);
   });
+  
+  socket.on('triggerStartGame', () =>{
+    io.emit("initiateCountDown", WAIT_TIME);
+    setTimeout(()=>{
+      //Create the game
+      gameObject.cardsThisRound = STARTING_CARDS;
+
+      dealCards(gameObject, playerService.getPlayers());
+      messageService.sendPlayerUpdate(io);
+      io.emit("startGame", gameObject);
+    }, WAIT_TIME * 1000);
+  });
 
 });
+
+function dealCards(gameObject, players){
+  var cardsDealt = cardService.dealCards(gameObject.cardsThisRound, players.length);
+
+  gameObject.trumpCard = cardsDealt.trumpCard;
+  players.forEach((player, i) => {
+    player.hand = cardsDealt.playerHands[i];
+  });
+}
