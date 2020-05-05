@@ -1,3 +1,20 @@
 <div ng-if="gameStarted">
-    <h1>Trumps are {{gameObject.trumpCard.suit.name}}</h1>
+    <h2>Game</h2>
+    <div class="row">
+        <div class="col-6"><strong>Trumps</strong></div>
+        <div class="col-6 cappy">{{gameObject.trumpCard.suit.name}}</div>
+    </div>
+    <div class="row">
+        <div class="col-6"><strong>Cards this round</strong></div>
+        <div class="col-6 cappy">{{gameObject.cardsThisRound}}</div>
+    </div>
+    <div class="row">
+        <div class="col-6"><strong>Phase</strong></div>
+        <div class="col-6 cappy">{{gameObject.phase}}</div>
+    </div>
+    <div class="row">
+        <div class="col-6"><strong>Turn</strong></div>
+        <div class="col-6 cappy" ng-if="players[gameObject.playersTurn].socketId != myPlayer.socketId">{{players[gameObject.playersTurn].name}}</div>
+        <div class="col-6  cappy" ng-if="players[gameObject.playersTurn].socketId == myPlayer.socketId">Me</div>
+    </div>
 </div>
