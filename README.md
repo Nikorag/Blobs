@@ -2,6 +2,9 @@
 # Blobs
 Recreation of the card-game Blobs to be played multiplayer in a browser.
 
+# Build Status
+![Node.js CI](https://github.com/Nikorag/Blobs/workflows/Node.js%20CI/badge.svg)
+
 ## Technologies Used
 
  - NodeJS & Express
