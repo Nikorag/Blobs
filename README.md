@@ -39,6 +39,7 @@ Tests are written in Mocha. Once the project is cloned and installed run:
 | triggerStartGame | client | NULL | Informs the server that the client wishes to start the game |
 | initiateCountDown | server | Integer | Triggers the client to show a countdown timer |
 | startGame | server | NULL | Informs the clients that the game has started |
+| makeCall | client | Integer | Informs the server of the players call for this round |
 
 ## Payloads
 

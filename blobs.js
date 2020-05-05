@@ -11,10 +11,16 @@ var cardService = require("./service/card_service");
 const WAIT_TIME = 5;
 const STARTING_CARDS = 7;
 
+var gameObjectTemplate = {
+  cardsThisRound : STARTING_CARDS,
+  phase : "Call",
+  calls : [],
+  playersTurn : 0,
+}
+
 //Create the game_object
-var gameObject = {
-  phase: "Call"
-};
+var gameObject = Object.assign({}, gameObjectTemplate);
+
 
 //Give static access to public directory
 app.use(express.static('public'));
@@ -50,27 +56,51 @@ io.on('connection', (socket) => {
   });
   
   socket.on('triggerStartGame', () =>{
-    io.emit("initiateCountDown", WAIT_TIME);
-    setTimeout(()=>{
-      //Tell the clients the game has started
-      io.emit("startGame");
+    //Tell the clients the game has started
+    io.emit("startGame");
 
-      //Create the game
-      gameObject.cardsThisRound = STARTING_CARDS;
-      gameObject.playersTurn = 0;
+    //Reset the game_object
+    var gameObject = Object.assign({}, gameObjectTemplate);
 
-      dealCards(gameObject, playerService.getPlayers());
-      messageService.sendGameUpdate(io, gameObject);
-    }, WAIT_TIME * 1000);
+    dealCards(gameObject, playerService.getPlayers());
+    messageService.sendGameUpdate(io, gameObject);
   });
 
+  socket.on('makeCall', (call) =>{
+    var player = playerService.getPlayer(socket.id);
+    var callObject = {
+      value: call,
+      player: player
+    };
+    gameObject.calls.push(callObject);
+    console.log(gameObject.calls);
+    gameObject.playersTurn++;
+
+    if (gameObject.playersTurn == playerService.getPlayers().length){
+      nextRound(gameObject, playerService.getPlayers());
+    }
+
+    messageService.sendGameUpdate(io, gameObject);
+  });
 });
 
 function dealCards(gameObject, players){
   var cardsDealt = cardService.dealCards(gameObject.cardsThisRound, players.length);
 
   gameObject.trumpCard = cardsDealt.trumpCard;
+  console.log("Trumps are "+gameObject.trumpCard.suit.suffix);
   players.forEach((player, i) => {
     player.hand = cardsDealt.playerHands[i];
   });
+}
+
+function nextRound(gameObject, players){
+  gameObject.playersTurn = 0;
+  if (gameObject.phase == 'Call'){
+    gameObject.phase = 'Play';
+  } else if (gameObject.phase == 'Play'){
+    //TODO lower card count and re-deal
+    gameObject.cardsThisRound--;
+    dealCards(gameObject, players);
+  }
 }
