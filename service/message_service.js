@@ -1,13 +1,14 @@
 var playerService = require("./player_service");
 
 module.exports = {
-  sendPlayerUpdate : function(io){
+  sendGameUpdate : function(io, gameObject){
     playerService.getPlayers().forEach((player) => {
       var msg = {
         myPlayer: player,
-        allPlayers: playerService.getPlayers()
+        allPlayers: playerService.getPlayers(),
+        gameObject: gameObject
       }
-      io.to(player.socketId).emit("playerUpdate", msg);
+      io.to(player.socketId).emit("gameUpdate", msg);
     });
   }
 }

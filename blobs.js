@@ -30,7 +30,7 @@ io.on('connection', (socket) => {
 
   //When a player connects, add that player and then emit a "playerUpdate" event to each player
   playerService.createPlayer(socket.id);
-  messageService.sendPlayerUpdate(io);
+  messageService.sendGameUpdate(io, gameObject);
 
   //Send message to confirm they've connected - This will trigger the change name popup
   io.to(socket.id).emit('whatIsYourName', true);
@@ -38,24 +38,26 @@ io.on('connection', (socket) => {
   //If they subsequently disconnect, remove them and emit another "playerUpdate" event to each player
   socket.on('disconnect', () => {
     playerService.removePlayer(socket.id);
-    messageService.sendPlayerUpdate(io);
+    messageService.sendGameUpdate(io, gameObject);
   });
 
   //If a player changes their name
   socket.on('nameChange', (newName) => {
     playerService.updatePlayerName(socket.id, newName);
-    messageService.sendPlayerUpdate(io);
+    messageService.sendGameUpdate(io, gameObject);
   });
   
   socket.on('triggerStartGame', () =>{
     io.emit("initiateCountDown", WAIT_TIME);
     setTimeout(()=>{
+      //Tell the clients the game has started
+      io.emit("startGame");
+
       //Create the game
       gameObject.cardsThisRound = STARTING_CARDS;
 
       dealCards(gameObject, playerService.getPlayers());
-      messageService.sendPlayerUpdate(io);
-      io.emit("startGame", gameObject);
+      messageService.sendGameUpdate(io, gameObject);
     }, WAIT_TIME * 1000);
   });
 

@@ -2,10 +2,12 @@ angular.module('blobs').controller("playerController", ['$rootScope', '$scope', 
   $scope.players = [];
   $scope.myPlayer = {};
   $scope.gameStarted = false;
+  $scope.gameObject = {};
 
-  $rootScope.$on("playerUpdate", function(event, playerUpdate){
-    $scope.players = playerUpdate.allPlayers;
-    $scope.myPlayer = playerUpdate.myPlayer;
+  $rootScope.$on("gameUpdate", function(event, gameUpdate){
+    $scope.players = gameUpdate.allPlayers;
+    $scope.myPlayer = gameUpdate.myPlayer;
+    $scope.gameObject = gameUpdate.gameObject;
   });
 
   $rootScope.$on("startGame", function(){

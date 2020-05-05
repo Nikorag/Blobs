@@ -2,10 +2,12 @@
 angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 'socket', function($rootScope, $scope, socket){
   $scope.mySocket = "";
   $scope.gameStarted = false;
+  $scope.gameObject = {};
 
-  socket.on("playerUpdate", function(playerUpdate){
-    $scope.mySocket = playerUpdate.myPlayer.socketId;
-    $rootScope.$emit("playerUpdate", playerUpdate);
+  socket.on("gameUpdate", function(gameUpdate){
+    $scope.mySocket = gameUpdate.myPlayer.socketId;
+    $scope.gameObject = gameUpdate.gameObject;
+    $rootScope.$emit("gameUpdate", gameUpdate);
   });
 
   socket.on("whatIsYourName", function(){
