@@ -24,12 +24,14 @@
 
       <div class="titlePanel col-xs-12 col-md-8">
         <h1>Blobs Game</h1>
+        <div ng-controller="myHandController" class="myHandPanel" ng-include="'templates/panels/myHandPanel.html'"></div>
       </div>
       <div class="col-xs-12 col-md-4">
         <div ng-controller="playerController" class="playerPanel" ng-include="'templates/panels/playerPanel.html'"></div>
+        <div ng-controller="gameStatusController" class="gameStatusPanel" ng-include="'templates/panels/gameStatusPanel.html'"></div>
       </div>
     </div>
-    <div ng-controller="myHandController" class="myHandPanel" ng-include="'templates/panels/myHandPanel.html'"></div>
+    
   </div>
   <div ng-controller="nameChangeController" class="nameChangeModal" ng-include="'templates/modals/nameChangeModal.html'"></div>
   <div ng-include="'templates/components/timerComponent.html'"></div>

@@ -12,7 +12,9 @@ const WAIT_TIME = 5;
 const STARTING_CARDS = 7;
 
 //Create the game_object
-var gameObject = {};
+var gameObject = {
+  phase: "Call"
+};
 
 //Give static access to public directory
 app.use(express.static('public'));
@@ -55,6 +57,7 @@ io.on('connection', (socket) => {
 
       //Create the game
       gameObject.cardsThisRound = STARTING_CARDS;
+      gameObject.playersTurn = 0;
 
       dealCards(gameObject, playerService.getPlayers());
       messageService.sendGameUpdate(io, gameObject);
