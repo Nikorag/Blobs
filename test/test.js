@@ -40,7 +40,81 @@ describe('CardService', () => {
             assert.equal(duplicates.length, 0);
         })
     });
+    describe('#getWinner', () => {
+        var card_service = require('../service/card_service');
+        it ("With no trumps pick the winner", () => {
+            //Create a specific data set
+            var trumpCard = {
+                suit: {
+                    name: "hearts",
+                    suffix: "h"
+                }
+            };
+            var cards = [
+                createCard(10, "c"),
+                createCard(8, "c"),
+                createCard(11, "c"),
+                createCard(3, "c"),
+                createCard(12, "d")
+            ];
+            var winner = card_service.getWinner(cards, trumpCard);
+            assert.equal(winner.card.value, 11);
+        });
+        it ("With one trump pick the winner", () => {
+            //Create a specific data set
+            var trumpCard = {
+                suit: {
+                    name: "hearts",
+                    suffix: "h"
+                }
+            };
+            var cards = [
+                createCard(10, "c"),
+                createCard(8, "c"),
+                createCard(11, "c"),
+                createCard(3, "h"),
+                createCard(12, "d")
+            ];
+            var winner = card_service.getWinner(cards, trumpCard);
+            assert.equal(winner.card.value, 3);
+        });
+        it ("With multiple trumps pick the winner", () => {
+            //Create a specific data set
+            var trumpCard = {
+                suit: {
+                    name: "hearts",
+                    suffix: "h"
+                }
+            };
+            var cards = [
+                createCard(10, "c"),
+                createCard(8, "h"),
+                createCard(11, "c"),
+                createCard(3, "h"),
+                createCard(12, "d")
+            ];
+            var winner = card_service.getWinner(cards, trumpCard);
+            assert.equal(winner.card.value, 8);
+        });
+    });
 });
+
+function createCard(value, suit){
+    var cardTemplate = {
+        card : {
+            label: "",
+            value: 0,
+            suit: {
+                name: "",
+                suffix: ""
+            }
+        }
+    };
+    var retObj = Object.assign({}, cardTemplate);
+    retObj.card.value = value;
+    retObj.card.suit.suffix=suit;
+    return retObj;
+}
 
 var { v4: uuidv4 } = require('uuid');
 describe('PlayerService', () => {

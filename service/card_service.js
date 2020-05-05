@@ -43,6 +43,32 @@ module.exports = {
         //Set the trump card
         retObj.trumpCard = getUniqueCard(dealtIndexes);
         return retObj;
+    },
+
+    getWinner: function(playedCards, trumpCard){
+        //Get the suit in play
+        var suit = cards[0].suit;
+        var trumpSuit = trumpCard.suit;
+
+        //filter out cards which aren't the correct suit or trumps
+        var validCards = playedCards.filter((playedCard) => {
+            var card = playedCard.card;
+            return card.suit.suffix == suit.suffix || card.suit.suffix == trumpSuit.suffix;
+        });
+
+        var winningCard = validCards.sort((a,b)=>{
+            if (a.card.suit.suffix == trumpSuit.suffix && b.card.suit.suffix != trumpSuit.suffix){
+                return -1;
+            } else if (b.card.suit.suffix == trumpSuit.suffix && a.card.suit.suffix != trumpSuit.suffix){
+                return 1;
+            }
+            if (a.card.value > b.card.value){
+                return -1;
+            } else if (b.card.value > a.card.value){
+                return 1;
+            }
+        })[0];
+        return winningCard;
     }
 }
 
