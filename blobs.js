@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
     //Reset the game_object
     var gameObject = Object.assign({}, gameObjectTemplate);
 
-    dealCards(gameObject, playerService.getPlayers());
+    dealCards();
     messageService.sendGameUpdate(io, gameObject);
   });
 
@@ -77,30 +77,30 @@ io.on('connection', (socket) => {
     gameObject.playersTurn++;
 
     if (gameObject.playersTurn == playerService.getPlayers().length){
-      nextRound(gameObject, playerService.getPlayers());
+      nextRound();
     }
 
     messageService.sendGameUpdate(io, gameObject);
   });
 });
 
-function dealCards(gameObject, players){
-  var cardsDealt = cardService.dealCards(gameObject.cardsThisRound, players.length);
+function dealCards(){
+  var cardsDealt = cardService.dealCards(gameObject.cardsThisRound, playerService.getPlayers().length);
 
   gameObject.trumpCard = cardsDealt.trumpCard;
-  console.log("Trumps are "+gameObject.trumpCard.suit.suffix);
-  players.forEach((player, i) => {
+  console.log("Trumps are "+gameObject.trumpCard.suit.name);
+  playerService.getPlayers().forEach((player, i) => {
     player.hand = cardsDealt.playerHands[i];
   });
 }
 
-function nextRound(gameObject, players){
+function nextRound(){
   gameObject.playersTurn = 0;
   if (gameObject.phase == 'Call'){
     gameObject.phase = 'Play';
   } else if (gameObject.phase == 'Play'){
     //TODO lower card count and re-deal
     gameObject.cardsThisRound--;
-    dealCards(gameObject, players);
+    dealCards();
   }
 }
