@@ -33,11 +33,13 @@
       <div class="col-xs-12 col-md-4">
         <div ng-controller="playerController" class="playerPanel" ng-include="'templates/panels/playerPanel.html'"></div>
         <div ng-controller="gameStatusController" class="gameStatusPanel" ng-include="'templates/panels/gameStatusPanel.html'"></div>
+        <button type="button" class="resetGameButton btn btn-danger" data-toggle="modal" data-target="#areYouSureResetModal">Reset Game</button>
       </div>
     </div>
     
   </div>
   <div ng-controller="nameChangeController" class="nameChangeModal" ng-include="'templates/modals/nameChangeModal.html'"></div>
+  <div class="areYouSureResetModal" ng-include="'templates/modals/areYouSureResetModal.html'"></div>
   <div ng-include="'templates/components/timerComponent.html'"></div>
 </body>
 

@@ -52,6 +52,15 @@ io.on('connection', (socket) => {
     messageService.sendGameUpdate(io, gameObject);
   });
 
+  socket.on('resetGame', () => {
+    //Reset the game_object
+    gameObject = copyService.copy(gameObjectTemplate);
+    //Reset all the players
+    playerService.resetPlayers();
+    io.emit('gameReset');
+    messageService.sendGameUpdate(io, gameObject);
+  });
+
   //If a player changes their name
   socket.on('nameChange', (newName) => {
     playerService.updatePlayerName(socket.id, newName);

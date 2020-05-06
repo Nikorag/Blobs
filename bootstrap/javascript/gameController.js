@@ -1,11 +1,15 @@
 //The main controller for the game
 angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 'socket', function($rootScope, $scope, socket){
-  $rootScope.mySocket = "";
-  $rootScope.gameStarted = false;
-  $rootScope.gameObject = {};
-  $rootScope.players = [];
-  $rootScope.myPlayer = {};
-  $rootScope.myPlayerIndex = 0;
+  $rootScope.init = function(){
+    $rootScope.mySocket = "";
+    $rootScope.gameStarted = false;
+    $rootScope.gameObject = {};
+    $rootScope.players = [];
+    $rootScope.myPlayer = {};
+    $rootScope.myPlayerIndex = 0;
+  }
+
+  $rootScope.init();
 
   //Useful functions
   $rootScope.createLoop = function(from,to){
@@ -30,7 +34,16 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
     return $rootScope.myPlayerIndex == $rootScope.gameObject.playersTurn;
   }
 
+  $rootScope.reset = function(){
+    socket.emit("resetGame");
+    $('#areYouSureResetModal').modal("hide");
+  }
+
   //Received Socket Events
+    socket.on("gameReset", function(){
+      $rootScope.init();
+    });
+
     socket.on("gameUpdate", function(gameUpdate){
       var wasMyTurn = $rootScope.isMyTurn();
       $rootScope.mySocket = gameUpdate.myPlayer.socketId;
