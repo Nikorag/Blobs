@@ -37,5 +37,17 @@ module.exports = {
     while (players[0].socketId != player.socketId){
       players.unshift(players.pop()); //Pop the last player to the first
     }
+  },
+
+  rotateWithNewDealer: function(oldDealer){
+    //Get index of dealer
+    var index = players.map((player) => {return player.socketId;}).indexOf(oldDealer.socketId);
+    //Add 2 to the index
+    index += 2;
+    var newPlayerOneIndex = index % players.length;
+    var newPlayerOne = players[newPlayerOneIndex];
+    module.exports.rotateToFirst(newPlayerOne);
+
+    return players[players.length-1];
   }
 };

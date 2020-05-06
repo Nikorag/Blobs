@@ -173,10 +173,30 @@ describe('PlayerService', () => {
     describe('#rotateToFirst', () => {
         it('Should should rotate a player to first', ()=>{
             var playerService = require('../service/player_service');
-            var playerIndex = Math.floor(Math.random() * (playerService.getPlayers().length -1)) + 1;
+            var playerIndex = Math.floor(Math.random() * (playerService.getPlayers().length -1)) + 1; //Grab any player but the first one
             var playerToPop = playerService.getPlayers()[playerIndex];
             playerService.rotateToFirst(playerToPop);
             assert.equal(playerService.getPlayers()[0].socketId, playerToPop.socketId);
+        });
+    });
+
+    describe('#rotateWithNewDealer', () => {
+        it('Should rotate the next player to first', ()=>{
+            var playerService = require('../service/player_service');
+            var playerIndex = Math.floor(Math.random() * (playerService.getPlayers().length -3)) + 0; //Grab any player but the last two
+            var dealer = playerService.getPlayers()[playerIndex];
+            var expectedPlayerOne = playerService.getPlayers()[playerIndex + 2];
+            playerService.rotateWithNewDealer(dealer);
+            var actualPlayerOne = playerService.getPlayers()[0];
+            assert.equal(expectedPlayerOne, actualPlayerOne);
+        });
+        it ('should move the dealer along one', ()=>{
+            var playerService = require('../service/player_service');
+            var playerIndex = Math.floor(Math.random() * (playerService.getPlayers().length -3)) + 0; //Grab any player but the last two
+            var dealer = playerService.getPlayers()[playerIndex];
+            var expectedNewDealer = playerService.getPlayers()[playerIndex + 1];
+            var actualNewDelaer = playerService.rotateWithNewDealer(dealer);
+            assert.equal(expectedNewDealer, actualNewDelaer);
         });
     });
 })
