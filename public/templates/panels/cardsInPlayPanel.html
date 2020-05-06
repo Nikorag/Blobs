@@ -1,0 +1,10 @@
+<ul>
+    <li ng-repeat="card in gameObject.cardsInPlay" class="card_in_play">
+        <span class="row">
+            <img src="https://raw.githubusercontent.com/hayeah/playing-cards-assets/master/svg-cards/{{card.card.label}}_of_{{card.card.suit.name}}.svg"/>
+        </span>
+        <span class="row">
+            {{card.player.name}}
+        </span>
+    </li>
+</ul>

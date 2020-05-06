@@ -47,7 +47,7 @@ module.exports = {
 
     getWinner: function(playedCards, trumpCard){
         //Get the suit in play
-        var suit = cards[0].suit;
+        var suit = playedCards[0].card.suit;
         var trumpSuit = trumpCard.suit;
 
         //filter out cards which aren't the correct suit or trumps

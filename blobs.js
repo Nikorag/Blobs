@@ -16,6 +16,7 @@ var gameObjectTemplate = {
   phase : "Call",
   calls : [],
   playersTurn : 0,
+  cardsInPlay: []
 }
 
 //Create the game_object
@@ -73,11 +74,28 @@ io.on('connection', (socket) => {
       player: player
     };
     gameObject.calls.push(callObject);
-    console.log(gameObject.calls);
     gameObject.playersTurn++;
 
     if (gameObject.playersTurn == playerService.getPlayers().length){
       nextRound();
+    }
+
+    messageService.sendGameUpdate(io, gameObject);
+  });
+
+  socket.on('playCard', (card) =>{
+    playCard(card, playerService.getPlayer(socket.id));
+
+    gameObject.playersTurn++;
+
+    if (gameObject.cardsInPlay.length == playerService.getPlayers().length){
+      setTimeout(()=>{
+        var winner = cardService.getWinner(gameObject.cardsInPlay, gameObject.trumpCard);
+        //TODO do something with the winner
+        playerService.getPlayer(winner.player.socketId).tricks++;
+        nextRound();
+        messageService.sendGameUpdate(io, gameObject);
+      },2000)
     }
 
     messageService.sendGameUpdate(io, gameObject);
@@ -94,13 +112,26 @@ function dealCards(){
   });
 }
 
+function playCard(card, player){
+  //Create a cardPlayed item and push it to the gameObject
+  var cardPlayed = {
+    card: card,
+    player: player
+  };
+  gameObject.cardsInPlay.push(cardPlayed);
+
+  //Remove the card from the players hand
+  player.hand = player.hand.filter((cardInHand) => {
+    return !(cardInHand.value == card.value && cardInHand.suit.suffix == card.suit.suffix);
+  })
+}
+
 function nextRound(){
   gameObject.playersTurn = 0;
   if (gameObject.phase == 'Call'){
     gameObject.phase = 'Play';
   } else if (gameObject.phase == 'Play'){
-    //TODO lower card count and re-deal
     gameObject.cardsThisRound--;
-    dealCards();
+    gameObject.cardsInPlay = [];
   }
 }
