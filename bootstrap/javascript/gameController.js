@@ -38,6 +38,12 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
       }
     }).reduce(function(a,b){return a+b;},0);
   }
+
+  $rootScope.roundNumber = function(){
+    return $rootScope.players.map(function(player){
+      return player.scores.length
+    }).sort(function(a, b){return b-a})[0];
+  }
   
   $rootScope.isMyTurn = function(){
     return $rootScope.myPlayerIndex == $rootScope.gameObject.playersTurn;
