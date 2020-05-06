@@ -1,3 +1,5 @@
+var copyService = require("./copy_service");
+
 var players = [];
 
 var playerTemplate = {
@@ -10,7 +12,7 @@ var playerTemplate = {
 module.exports = {
 
   createPlayer: function(id){
-    var player = Object.assign({}, playerTemplate);
+    var player = copyService.copy(playerTemplate);
     player.socketId = id;
     player.name = "New Player"
     players.push(player);

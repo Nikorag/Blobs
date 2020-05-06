@@ -6,6 +6,7 @@ var io = require('socket.io')(http);
 var playerService = require("./service/player_service");
 var messageService = require("./service/message_service");
 var cardService = require("./service/card_service");
+var copyService = require("./service/copy_service");
 
 //Create some constants
 const WAIT_TIME = 5;
@@ -21,7 +22,7 @@ var gameObjectTemplate = {
 }
 
 //Create the game_object
-var gameObject = Object.assign({}, gameObjectTemplate);
+var gameObject = copyService.copy(gameObjectTemplate);
 
 
 //Give static access to public directory
@@ -62,7 +63,7 @@ io.on('connection', (socket) => {
     io.emit("startGame");
 
     //Reset the game_object
-    var gameObject = Object.assign({}, gameObjectTemplate);
+    var gameObject = copyService.copy(gameObjectTemplate);
 
     //Set the dealer to the last player
     gameObject.dealer = playerService.getPlayers()[playerService.getPlayers().length - 1];

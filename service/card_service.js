@@ -1,3 +1,5 @@
+var copyService = require("./copy_service");
+
 var suits = [{name:"clubs", suffix:"c"},{name:"hearts", suffix:"h"},{name:"diamonds", suffix:"d"},{name:"spades", suffix:"s"}];
 var values = [{label: "2", value: 2},{label: "3", value: 3},{label: "4", value: 4},{label: "5", value: 5},{label: "6", value: 6},{label: "7", value: 7},{label: "8", value: 8},
 {label: "9", value: 9},{label: "10", value: 10},{label: "jack", value: 11},{label: "queen", value: 12},{label: "king", value: 13},{label: "ace", value: 14}];
@@ -79,7 +81,7 @@ function getUniqueCard(dealtIndexes){
     while (index == 100 || dealtIndexes.includes(index)){
         index = Math.floor(Math.random() * 52);
     }
-    var selectedCard = Object.assign({}, cards[index]);
+    var selectedCard = copyService.copy(cards[index]);
     //Log that we've dealt this card
     dealtIndexes.push(index);
     //Return the card;

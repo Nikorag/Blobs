@@ -1,0 +1,17 @@
+<h2>Scores</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th ng-repeat="player in players">
+                {{player.name}}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="i in createLoop(0, players[0].scores.length -1)">
+            <td ng-repeat="player in players">
+                {{player.scores[i]}}
+            </td>
+        </tr>
+    </tbody>
+</table>

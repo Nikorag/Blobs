@@ -1,3 +1,4 @@
+var copyService = require("../service/copy_service");
 var assert = require('assert');
 
 describe('CardService', () => {
@@ -110,7 +111,7 @@ function createCard(value, suit){
             }
         }
     };
-    var retObj = Object.assign({}, cardTemplate);
+    var retObj = copyService.copy(cardTemplate);
     retObj.card.value = value;
     retObj.card.suit.suffix=suit;
     return retObj;
