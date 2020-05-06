@@ -26,6 +26,7 @@
     "@babel/core": "^7.9.6",
     "@babel/preset-env": "^7.9.6",
     "express": "^4.17.1",
+    "faker": "^4.1.0",
     "grunt": "^1.1.0",
     "grunt-babel": "^8.0.0",
     "grunt-contrib-clean": "^2.0.0",

@@ -138,7 +138,24 @@ function nextRound(){
   if (gameObject.phase == 'Call'){
     gameObject.phase = 'Play';
   } else if (gameObject.phase == 'Play'){
-    gameObject.cardsThisRound--;
     gameObject.cardsInPlay = [];
+    //have we played all the cards?!
+    if (playerService.getPlayers()[0].hand.length ==  0){
+        //Update Scores
+        playerService.updateScores();
+        //Reduce the number of cards
+        gameObject.cardsThisRound--;
+        if (gameObject.cardsThisRound > 0){
+          //Rotate the players
+          gameObject.dealer = playerService.rotateWithNewDealer(gameObject.dealer);
+          //Set phase back to call
+          gameObject.phase = 'Call';
+          //Deal new cards
+          dealCards();
+        } else {
+          //TODO game over
+          gameObject.phase == 'End';
+        }
+    }
   }
 }

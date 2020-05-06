@@ -17,4 +17,8 @@
         <div class="col-6 cappy" ng-if="players[gameObject.playersTurn].socketId != myPlayer.socketId">{{players[gameObject.playersTurn].name}}</div>
         <div class="col-6  cappy" ng-if="players[gameObject.playersTurn].socketId == myPlayer.socketId">Me</div>
     </div>
+    <div class="row">
+        <div class="col-6"><strong>Dealer</strong></div>
+        <div class="col-6 cappy">{{gameObject.dealer.name}}</div>
+    </div>
 </div>

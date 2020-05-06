@@ -15,6 +15,18 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
     }
     return ret;
   }
+
+  $rootScope.totalScore = function(player){
+    return player.scores.map(function(score,index){
+      if (score == "BLOB"){
+        return 0;
+      } else if (index == player.scores.length - 1 && $rootScope.phase == 'Play'){
+        return 0;
+      } else {
+        return score;
+      }
+    }).reduce(function(a,b){return a+b;},0);
+  }
   
   $rootScope.isMyTurn = function(){
     return $rootScope.myPlayerIndex == $rootScope.gameObject.playersTurn;
@@ -46,5 +58,4 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
     socket.on("initiateCountDown", function(seconds){
       startCountdown(seconds);
     });
-
 }]);

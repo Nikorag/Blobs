@@ -1,4 +1,5 @@
 var copyService = require("./copy_service");
+var faker = require('faker');
 
 var players = [];
 
@@ -14,7 +15,7 @@ module.exports = {
   createPlayer: function(id){
     var player = copyService.copy(playerTemplate);
     player.socketId = id;
-    player.name = "New Player"
+    player.name = faker.name.firstName() + " " + faker.name.lastName();
     players.push(player);
   },
 
@@ -51,5 +52,16 @@ module.exports = {
     module.exports.rotateToFirst(newPlayerOne);
 
     return players[players.length-1];
+  },
+
+  updateScores: function(){
+    players.forEach((player) => {
+      var call = player.scores[player.scores.length - 1];
+      var tricks = player.tricks;
+      if (tricks != call){
+        player.scores[player.scores.length - 1] = "BLOB";
+      }
+      player.tricks = 0;
+    });
   }
 };
