@@ -3,7 +3,7 @@
     <thead>
         <tr>
             <th>#</th>
-            <th ng-repeat="player in players">
+            <th ng-repeat="player in sortedPlayers()">
                 {{player.name}}
             </th>
         </tr>
@@ -11,13 +11,13 @@
     <tbody>
         <tr ng-repeat="i in createLoop(0, players[0].scores.length -1)">
             <td><span ng-if="i == players[0].scores.length -1">This Round</span></td>
-            <td ng-repeat="player in players">
+            <td ng-repeat="player in sortedPlayers()">
                 {{player.scores[i]}}
             </td>
         </tr>
         <tr class="totalsRow">
             <td>Total</td>
-            <td ng-repeat="player in players">
+            <td ng-repeat="player in sortedPlayers()">
                 {{totalScore(player)}}
             </td>
         </tr>

@@ -12,6 +12,15 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
   $rootScope.init();
 
   //Useful functions
+  $rootScope.sortedPlayers = function(){
+    return $rootScope.players.sort(function(a,b){
+      if (a.ts > b.ts){
+        return 1;
+      } else {
+        return -1;
+      }
+    });
+  }
   $rootScope.createLoop = function(from,to){
     var ret = [];
     for (var i = from; i<=to; i++){

@@ -13,9 +13,11 @@ var playerTemplate = {
 module.exports = {
 
   createPlayer: function(id){
+    var ts = Math.round((new Date()).getTime() / 1000);
     var player = copyService.copy(playerTemplate);
     player.socketId = id;
     player.name = faker.name.firstName() + " " + faker.name.lastName();
+    player.ts = ts;
     players.push(player);
   },
 
