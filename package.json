@@ -5,7 +5,8 @@
   "main": "blobs.js",
   "scripts": {
     "test": "mocha",
-    "start": "grunt && node ./blobs.js"
+    "start": "grunt && node ./blobs.js",
+    "test-jenkins": "JUNIT_REPORT_PATH=report.xml mocha --colors --reporter mocha-jenkins-reporter"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,7 @@
     "grunt-contrib-uglify": "^4.0.1",
     "grunt-contrib-watch": "^1.1.0",
     "mocha": "^7.1.2",
+    "mocha-jenkins-reporter": "^0.4.3",
     "socket.io": "^2.3.0",
     "uuid": "^8.0.0"
   }
