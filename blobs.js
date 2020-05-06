@@ -69,6 +69,7 @@ io.on('connection', (socket) => {
 
   socket.on('makeCall', (call) =>{
     var player = playerService.getPlayer(socket.id);
+    player.scores.push(call);
     var callObject = {
       value: call,
       player: player
