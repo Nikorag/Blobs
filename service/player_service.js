@@ -31,5 +31,11 @@ module.exports = {
   updatePlayerName: function(id, name){
     var player = module.exports.getPlayer(id);
     player.name = name;
+  },
+
+  rotateToFirst: function(player){
+    while (players[0].socketId != player.socketId){
+      players.unshift(players.pop()); //Pop the last player to the first
+    }
   }
 };

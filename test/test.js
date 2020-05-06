@@ -170,4 +170,13 @@ describe('PlayerService', () => {
         });
         
     })
+    describe('#rotateToFirst', () => {
+        it('Should should rotate a player to first', ()=>{
+            var playerService = require('../service/player_service');
+            var playerIndex = Math.floor(Math.random() * (playerService.getPlayers().length -1)) + 1;
+            var playerToPop = playerService.getPlayers()[playerIndex];
+            playerService.rotateToFirst(playerToPop);
+            assert.equal(playerService.getPlayers()[0].socketId, playerToPop.socketId);
+        });
+    });
 })

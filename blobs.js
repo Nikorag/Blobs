@@ -16,7 +16,8 @@ var gameObjectTemplate = {
   phase : "Call",
   calls : [],
   playersTurn : 0,
-  cardsInPlay: []
+  cardsInPlay: [],
+  dealer: {}
 }
 
 //Create the game_object
@@ -63,6 +64,9 @@ io.on('connection', (socket) => {
     //Reset the game_object
     var gameObject = Object.assign({}, gameObjectTemplate);
 
+    //Set the dealer to the last player
+    gameObject.dealer = playerService.getPlayers()[playerService.getPlayers().length - 1];
+
     dealCards();
     messageService.sendGameUpdate(io, gameObject);
   });
@@ -92,8 +96,9 @@ io.on('connection', (socket) => {
     if (gameObject.cardsInPlay.length == playerService.getPlayers().length){
       setTimeout(()=>{
         var winner = cardService.getWinner(gameObject.cardsInPlay, gameObject.trumpCard);
-        //TODO do something with the winner
         playerService.getPlayer(winner.player.socketId).tricks++;
+        //Winner goes first
+        playerService.rotateToFirst(winner.player);
         nextRound();
         messageService.sendGameUpdate(io, gameObject);
       },2000)
