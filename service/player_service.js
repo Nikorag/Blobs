@@ -63,5 +63,14 @@ module.exports = {
       }
       player.tricks = 0;
     });
+  },
+
+  resetPlayers: function(){
+    players.forEach((player) => {
+      player.hand = [];
+      player.call = undefined;
+      player.scores = [];
+      player.tricks = 0;
+    });
   }
 };

@@ -16,7 +16,7 @@ angular.module('blobs').controller("actionController", ['$rootScope', '$scope', 
 
     $scope.makeCall = function(call){
         //Is it even my turn?
-        if (!$rootScope.isMyTurn()){
+        if (!$rootScope.isMyTurn() || !$scope.canICall(call)){
             return;
         }
         //Make the call

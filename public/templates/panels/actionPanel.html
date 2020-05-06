@@ -1,7 +1,7 @@
 <div ng-if="gameStarted && gameObject.phase == 'Call'">
     <h2>Call Phase</h2>
     <ul class="callList">
-        <li ng-repeat="call in createLoop(1, gameObject.cardsThisRound)">
+        <li ng-repeat="call in createLoop(0, gameObject.cardsThisRound)">
             <button type="button" class="btn btn-success canICall_{{canICall(call)}}" ng-click="makeCall(call)">{{call}}</button>
         </li>
     </ul>

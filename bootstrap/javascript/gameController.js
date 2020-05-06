@@ -19,9 +19,7 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
   $rootScope.totalScore = function(player){
     return player.scores.map(function(score,index){
       if (score == "BLOB"){
-        return 0;
-      } else if (index == player.scores.length - 1 && $rootScope.phase == 'Play'){
-        return 0;
+        return -1;
       } else {
         return score;
       }
@@ -34,12 +32,17 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
 
   //Received Socket Events
     socket.on("gameUpdate", function(gameUpdate){
+      var wasMyTurn = $rootScope.isMyTurn();
       $rootScope.mySocket = gameUpdate.myPlayer.socketId;
       $rootScope.gameObject = gameUpdate.gameObject;
       $rootScope.players = gameUpdate.allPlayers;
       $rootScope.myPlayer = gameUpdate.myPlayer;
       $rootScope.myPlayerIndex = gameUpdate.myPlayerIndex;
       $rootScope.$emit("gameUpdate", gameUpdate);
+      var isMyTurn = $rootScope.isMyTurn();
+      if ($rootScope.gameStarted && !wasMyTurn && isMyTurn){
+        showToast("My Turn", "It's my turn!");
+      }
     });
 
     socket.on("whatIsYourName", function(){
@@ -57,5 +60,9 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
 
     socket.on("initiateCountDown", function(seconds){
       startCountdown(seconds);
+    });
+
+    socket.on("showToast", function(toast){
+      showToast(toast.title, toast.body);
     });
 }]);

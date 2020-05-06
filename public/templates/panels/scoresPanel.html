@@ -10,7 +10,7 @@
     </thead>
     <tbody>
         <tr ng-repeat="i in createLoop(0, players[0].scores.length -1)">
-            <td></td>
+            <td><span ng-if="i == players[0].scores.length -1">This Round</span></td>
             <td ng-repeat="player in players">
                 {{player.scores[i]}}
             </td>

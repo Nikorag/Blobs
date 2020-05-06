@@ -8,8 +8,7 @@ module.exports = function(grunt) {
       },
       dist: {
         files: {
-          'bootstrap/javascript/transpiledComponents.js': 'bootstrap/javascript/components/*.es',
-          'bootstrap/javascript/transpiled.js': 'bootstrap/javascript/*.es',
+          'bootstrap/javascript/transpiledComponents.js': 'bootstrap/javascript/components/combined.es'
         }
       }
     },
@@ -28,6 +27,10 @@ module.exports = function(grunt) {
       }
     },
     concat: {
+      es: {
+        src: ['bootstrap/javascript/components/*.es'],
+        dest: 'bootstrap/javascript/components/combined.es',
+      },
       js: {
         src: ['bootstrap/javascript/transpiledComponents.js', 'bootstrap/javascript/ang.main.js', 'bootstrap/javascript/*.js'],
         dest: 'public/javascript/main.min.js',
@@ -56,7 +59,7 @@ module.exports = function(grunt) {
         src: ['public/javascript/*', 'public/stylesheets/*']
       },
       after: {
-        src: ['bootstrap/javascript/transpiled.js', 'bootstrap/javascript/transpiledComponents.js', 'bootstrap/javascript/*.js.map', 'public/stylesheets/*.css', '!public/stylesheets/main.min.css']
+        src: ['bootstrap/javascript/components/combined.es', 'bootstrap/javascript/transpiledComponents.js', 'bootstrap/javascript/*.js.map', 'public/stylesheets/*.css', '!public/stylesheets/main.min.css']
       }
     },
     watch: {
@@ -79,7 +82,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-babel');
 
-  grunt.registerTask('dev', ['clean:before', 'babel', 'less:development', 'concat', 'uglify:development', 'cssmin', 'clean:after', 'watch']);
-  grunt.registerTask('default', ['clean:before', 'babel', 'less:development', 'concat', 'cssmin', 'uglify:development', 'clean:after']);
+  grunt.registerTask('dev', ['clean:before', 'concat:es','babel', 'less:development', 'concat:js', 'uglify:development', 'cssmin', 'clean:after', 'watch']);
+  grunt.registerTask('default', ['clean:before', 'concat:es', 'babel', 'less:development', 'concat:js', 'cssmin', 'uglify:development', 'clean:after']);
 
 };

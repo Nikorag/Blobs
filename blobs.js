@@ -63,7 +63,9 @@ io.on('connection', (socket) => {
     io.emit("startGame");
 
     //Reset the game_object
-    var gameObject = copyService.copy(gameObjectTemplate);
+    gameObject = copyService.copy(gameObjectTemplate);
+    //Reset all the players
+    playerService.resetPlayers();
 
     //Set the dealer to the last player
     gameObject.dealer = playerService.getPlayers()[playerService.getPlayers().length - 1];
@@ -74,6 +76,9 @@ io.on('connection', (socket) => {
 
   socket.on('makeCall', (call) =>{
     var player = playerService.getPlayer(socket.id);
+
+    io.emit("showToast", {body: player.name+" called "+call, title: "Call"});
+
     player.scores.push(call);
     var callObject = {
       value: call,
@@ -102,7 +107,11 @@ io.on('connection', (socket) => {
         playerService.rotateToFirst(winner.player);
         nextRound();
         messageService.sendGameUpdate(io, gameObject);
+        io.emit("showToast", {body: winner.player.name+" won that trick!", title: "Winner"});
+        io.emit("showToast", {body: "Its "+playerService.getPlayers()[gameObject.playersTurn].name+"s turn", title: "Next Turn"});
       },2000)
+    } else {
+      io.emit("showToast", {body: "Its "+playerService.getPlayers()[gameObject.playersTurn].name+"s turn", title: "Next Turn"});
     }
 
     messageService.sendGameUpdate(io, gameObject);
