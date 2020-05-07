@@ -10,7 +10,10 @@
       <div class="modal-body">
         <form>
           <div class="form-group">
-            <input ng-keydown="nameKeyDown($event, myPlayer.name)" type="text" class="form-control" id="newNameInput" ng-model="myPlayer.name">
+            <div class="row">
+              <div class="col-10"><input ng-keydown="nameKeyDown($event, myPlayer.name)" type="text" class="form-control" id="newNameInput" ng-model="myPlayer.name"></div>
+              <div class="col-2"><button type="button" class="btn btn-primary random-button" ng-click="randomizeName()"><i class="fas fa-random"></i></button></div>
+            </div>
           </div>
         </form>
       </div>

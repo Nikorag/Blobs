@@ -9,4 +9,8 @@ angular.module('blobs').controller("nameChangeController", ['$rootScope', '$scop
         socket.emit("nameChange", name);
         $('#nameChangeModal').modal("hide");
     }
+
+    $scope.randomizeName = function(){
+        document.getElementById("newNameInput").value = faker.name.firstName() + " " + faker.name.lastName();
+    };
 }]);
