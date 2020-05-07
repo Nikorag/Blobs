@@ -13,11 +13,11 @@
                 <div class="collapse multi-collapse" id="playerScorePanel{{$index}}">
                     <div class="card card-body">
                         <div class="row">
-                            <div class="col-8">Tricks So Far:</div>
+                            <div class="col-8 strong">Tricks So Far:</div>
                             <div class="col-4">{{player.tricks}}</div>
                         </div>
                         <div class="row">
-                            <div class="col-8">Call This Round:</div>
+                            <div class="col-8 strong">Call This Round:</div>
                             <div class="col-4">{{player.scores[roundNumber() - 1]}}</div>
                         </div>
                         <div class="row">
@@ -30,9 +30,9 @@
                                 </ul>
                             </div>
                         </div>
-                        <div class="row totalScoreRow">
-                            <div class="col-8">Total Score:</div>
-                            <div class="col-4">{{totalScore(player)}}</div>
+                        <div class="row">
+                            <div class="col-8 cappy strong">Total Score:</div>
+                            <div class="col-4 cappy strong">{{totalScore(player)}}</div>
                         </div>
                     </div>
                 </div>
