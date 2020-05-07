@@ -1,0 +1,47 @@
+<div class="modal fade" id="playersAndScoresModal" tabindex="-1" role="dialog" aria-labelledby="playersAndScoresModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Players And Scores</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div ng-repeat="player in players">
+                <button class="fullWidth btn btn-primary" type="button" data-toggle="collapse" data-target="#playerScorePanel{{$index}}">{{player.name}}</button>
+                <div class="collapse multi-collapse" id="playerScorePanel{{$index}}">
+                    <div class="card card-body">
+                        <div class="row">
+                            <div class="col-8">Tricks So Far:</div>
+                            <div class="col-4">{{player.tricks}}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-8">Call This Round:</div>
+                            <div class="col-4">{{player.scores[roundNumber() - 1]}}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <h3>Record</h3>
+                            </div>
+                            <div class="col-12">
+                                <ul>
+                                    <li ng-repeat="score in player.scores">{{score}}</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="row totalScoreRow">
+                            <div class="col-8">Total Score:</div>
+                            <div class="col-4">{{totalScore(player)}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  

@@ -31,14 +31,17 @@ body {
       }
     }
   }
-  .resetGameButton {
-    width: 100%;
-    margin-top: @gutter;
-  }
 
   ul {
     @media only screen and (max-width: 770px) {
       padding-left: 0px;
+    }
+  }
+
+  .btn {
+    &.fullWidth {
+      width: 100%;
+      margin-top: @gutter;
     }
   }
 }

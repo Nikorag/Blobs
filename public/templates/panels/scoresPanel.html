@@ -1,25 +1,31 @@
-<h2>Scores</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th ng-repeat="player in sortedPlayers()">
-                {{player.name}}
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr ng-repeat="i in createLoop(0, roundNumber() -1)">
-            <td><span ng-if="i == roundNumber() -1">This Round</span></td>
-            <td ng-repeat="player in sortedPlayers()">
-                {{player.scores[i]}}
-            </td>
-        </tr>
-        <tr class="totalsRow">
-            <td>Total</td>
-            <td ng-repeat="player in sortedPlayers()">
-                {{totalScore(player)}}
-            </td>
-        </tr>
-    </tbody>
-</table>
+<div class="desktop-only">
+    <h2>Scores</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th ng-repeat="player in sortedPlayers()">
+                    {{player.name}}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="i in createLoop(0, roundNumber() -1)">
+                <td><span ng-if="i == roundNumber() -1">This Round</span></td>
+                <td ng-repeat="player in sortedPlayers()">
+                    {{player.scores[i]}}
+                </td>
+            </tr>
+            <tr class="totalsRow">
+                <td>Total</td>
+                <td ng-repeat="player in sortedPlayers()">
+                    {{totalScore(player)}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="mobile-only">
+    <button type="button" class="fullWidth btn btn-success" data-toggle="modal" data-target="#playersAndScoresModal">Players & Scores</button>
+</div>
+<div ng-include="'templates/modals/playersAndScoresModal.html'"></div>
