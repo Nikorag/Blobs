@@ -169,6 +169,8 @@ function nextRound(){
           gameObject.dealer = playerService.rotateWithNewDealer(gameObject.dealer);
           //Set phase back to call
           gameObject.phase = 'Call';
+          //Empty the calls
+          gameObject.calls = [];
           //Deal new cards
           dealCards();
         } else {
