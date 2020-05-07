@@ -11,6 +11,6 @@ angular.module('blobs').controller("nameChangeController", ['$rootScope', '$scop
     }
 
     $scope.randomizeName = function(){
-        document.getElementById("newNameInput").value = faker.name.firstName() + " " + faker.name.lastName();
+        socket.emit("nameChange", faker.name.firstName() + " " + faker.name.lastName());
     };
 }]);
