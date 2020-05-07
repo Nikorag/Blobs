@@ -68,13 +68,14 @@ io.on('connection', (socket) => {
   });
   
   socket.on('triggerStartGame', () =>{
-    //Tell the clients the game has started
-    io.emit("startGame");
-
     //Reset the game_object
     gameObject = copyService.copy(gameObjectTemplate);
     //Reset all the players
     playerService.resetPlayers();
+    io.emit('gameReset');
+
+    //Tell the clients the game has started
+    io.emit("startGame");
 
     //Set the dealer to the last player
     gameObject.dealer = playerService.getPlayers()[playerService.getPlayers().length - 1];

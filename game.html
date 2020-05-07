@@ -26,15 +26,16 @@
     <div class="row">
 
       <div class="titlePanel col-xs-12 col-md-8">
-        <h1>Blobs Game</h1>
+        <h1>Blobs</h1>
+        <div ng-controller="gameStatusController" class="gameStatusPanel mobile-only" ng-include="'templates/panels/gameStatusPanel.html'"></div>
         <div ng-controller="actionController" class="actionPanel" ng-include="'templates/panels/actionPanel.html'"></div>
         <div class="cardsInPlayPanel" ng-include="'templates/panels/cardsInPlayPanel.html'"></div>
         <div ng-controller="myHandController" class="myHandPanel" ng-include="'templates/panels/myHandPanel.html'"></div>
         <div ng-if="gameStarted" class="scoresPanel" ng-include="'templates/panels/scoresPanel.html'"></div>
       </div>
       <div class="col-xs-12 col-md-4">
-        <div ng-controller="playerController" class="playerPanel" ng-include="'templates/panels/playerPanel.html'"></div>
-        <div ng-controller="gameStatusController" class="gameStatusPanel" ng-include="'templates/panels/gameStatusPanel.html'"></div>
+        <div ng-controller="playerController" class="playerPanel {{gameStarted ? 'desktop-only' : ''}}" ng-include="'templates/panels/playerPanel.html'"></div>
+        <div ng-controller="gameStatusController" class="gameStatusPanel desktop-only" ng-include="'templates/panels/gameStatusPanel.html'"></div>
         <button type="button" class="resetGameButton btn btn-danger" data-toggle="modal" data-target="#areYouSureResetModal">Reset Game</button>
       </div>
     </div>
