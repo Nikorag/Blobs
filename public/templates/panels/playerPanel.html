@@ -1,15 +1,20 @@
 <h2>Players</h2>
 <ul class="playerList">
-  <li ng-repeat="player in sortedPlayers()" class="row">
-    <div class="col-8">
+  <li ng-repeat="player in sortedPlayers" class="row">
+    <div class="col-6">
       {{player.name}}
     </div>
+    <div class="col-2">
+      <span ng-if="player.ready">✔</span>
+    </div>
     <div class="col-4">
-      <button ng-if="player.socketId == myPlayer.socketId && !gameStarted" type="button" class="btn btn-primary" data-toggle="modal" data-target="#nameChangeModal">
+      <button ng-if="player.socketId == myPlayer.socketId && !gameStarted" type="button" class="btn btn-primary" ng-click="showRename()">
         Rename
       </button>
       <span ng-if="gameStarted && gameObject.phase == 'Play'">Tricks: {{player.tricks}}</span>
     </div>
   </li>
 </ul>
-<button ng-if="players.length > 1 && !gameStarted" type="button" ng-click="startGame()" class="startGameButton fullWidth btn btn-success">We're All Here</button>
+<button ng-if="everyoneReady() && players.length > 1 && !gameStarted" type="button" ng-click="startGame()" class="startGameButton fullWidth btn btn-success">We're All Here</button>
+<button ng-if="!gameStarted" type="button" ng-click="toggleReady()" class="fullWidth btn {{readyButtonClass()}}">{{readyButtonText()}}</button>
+<hr/>

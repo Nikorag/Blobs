@@ -7,7 +7,8 @@ var playerTemplate = {
   "hand" : [],
   "call" : undefined,
   "scores" : [],
-  "tricks" : 0
+  "tricks" : 0,
+  "ready": false
 };
 
 module.exports = {
@@ -78,5 +79,10 @@ module.exports = {
       player.scores = [];
       player.tricks = 0;
     });
+  },
+
+  playerReady: function(id, ready){
+    player = module.exports.getPlayer(id);
+    player.ready = ready;
   }
 };

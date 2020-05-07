@@ -5,22 +5,13 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
     $rootScope.gameStarted = false;
     $rootScope.gameObject = {};
     $rootScope.players = [];
+    $rootScope.sortedPlayers = [];
     $rootScope.myPlayer = {};
     $rootScope.myPlayerIndex = 0;
   }
 
   $rootScope.init();
 
-  //Useful functions
-  $rootScope.sortedPlayers = function(){
-    return $rootScope.players.sort(function(a,b){
-      if (a.ts > b.ts){
-        return 1;
-      } else {
-        return -1;
-      }
-    });
-  }
   $rootScope.createLoop = function(from,to){
     var ret = [];
     for (var i = from; i<=to; i++){
@@ -69,6 +60,13 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
       $rootScope.mySocket = gameUpdate.myPlayer.socketId;
       $rootScope.gameObject = gameUpdate.gameObject;
       $rootScope.players = gameUpdate.allPlayers;
+      $rootScope.sortedPlayers = gameUpdate.allPlayers.sort(function(a,b){
+        if (a.ts > b.ts){
+          return 1;
+        } else {
+          return -1;
+        }
+      });
       $rootScope.myPlayer = gameUpdate.myPlayer;
       $rootScope.myPlayerIndex = gameUpdate.myPlayerIndex;
       $rootScope.$emit("gameUpdate", gameUpdate);

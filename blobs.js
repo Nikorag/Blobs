@@ -73,6 +73,11 @@ io.on('connection', (socket) => {
     playerService.updatePlayerName(socket.id, newName);
     messageService.sendGameUpdate(io, gameObject);
   });
+
+  socket.on('playerReady', (ready) => {
+    playerService.playerReady(socket.id, ready);
+    messageService.sendGameUpdate(io, gameObject);
+  });
   
   socket.on('triggerStartGame', () =>{
     //Reset the game_object
