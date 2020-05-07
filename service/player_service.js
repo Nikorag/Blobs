@@ -12,6 +12,10 @@ var playerTemplate = {
 
 module.exports = {
 
+  clearPlayers: function(){
+    players = [];
+  },
+
   createPlayer: function(id){
     var ts = Math.round((new Date()).getTime() / 1000);
     var player = copyService.copy(playerTemplate);

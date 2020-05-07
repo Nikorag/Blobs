@@ -54,6 +54,11 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
     $('#areYouSureResetModal').modal("hide");
   }
 
+  $rootScope.kickAllPlayersAndReset = function(){
+    socket.emit("clearPlayers");
+    window.location.reload();
+  }
+
   //Received Socket Events
     socket.on("gameReset", function(){
       $rootScope.init();
