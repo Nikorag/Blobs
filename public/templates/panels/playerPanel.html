@@ -5,7 +5,7 @@
       {{player.name}}
     </div>
     <div class="col-2">
-      <span ng-if="player.ready">✔</span>
+      <span ng-if="!gameStarted && player.ready">✔</span>
     </div>
     <div class="col-4">
       <button ng-if="player.socketId == myPlayer.socketId && !gameStarted" type="button" class="btn btn-primary" ng-click="showRename()">
@@ -17,4 +17,3 @@
 </ul>
 <button ng-if="everyoneReady() && players.length > 1 && !gameStarted" type="button" ng-click="startGame()" class="startGameButton fullWidth btn btn-success">We're All Here</button>
 <button ng-if="!gameStarted" type="button" ng-click="toggleReady()" class="fullWidth btn {{readyButtonClass()}}">{{readyButtonText()}}</button>
-<hr/>
