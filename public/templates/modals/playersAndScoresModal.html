@@ -26,7 +26,7 @@
                             </div>
                             <div class="col-12">
                                 <ul>
-                                    <li ng-repeat="score in player.scores">{{score}}</li>
+                                    <li ng-repeat="scoreId in createLoop(0, player.scores.length-1)">{{player.scores[scoreId]}}</li>
                                 </ul>
                             </div>
                         </div>
