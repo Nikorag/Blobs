@@ -11,7 +11,7 @@
       <button ng-if="player.socketId == myPlayer.socketId && !gameStarted" type="button" class="btn btn-primary" ng-click="showRename()">
         Rename
       </button>
-      <span ng-if="gameStarted && gameObject.phase == 'Play'">Tricks: {{player.tricks}}</span>
+      <span ng-if="gameStarted && gameObject.phase == 'Play'">Tricks: {{player.tricks}}/{{player.scores[roundNumber() - 1]}}</span>
     </div>
   </li>
 </ul>
