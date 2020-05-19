@@ -78,6 +78,7 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
 
     socket.on("whatIsYourName", function(){
       $('#nameChangeModal').modal();
+      $('#newNameInput').val($rootScope.myPlayer.name);
       $('#nameChangeModal').on('shown.bs.modal', function () {
         $('#newNameInput').trigger('focus')
       })
