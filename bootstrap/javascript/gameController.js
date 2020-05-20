@@ -50,6 +50,10 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
     window.location.reload();
   }
 
+  $rootScope.copy = function(source){
+    return JSON.parse(JSON.stringify(source));
+  }
+
   //Received Socket Events
     socket.on("gameReset", function(){
       $rootScope.init();
@@ -60,7 +64,7 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
       $rootScope.mySocket = gameUpdate.myPlayer.socketId;
       $rootScope.gameObject = gameUpdate.gameObject;
       $rootScope.players = gameUpdate.allPlayers;
-      $rootScope.sortedPlayers = gameUpdate.allPlayers.sort(function(a,b){
+      $rootScope.sortedPlayers = $rootScope.copy(gameUpdate.allPlayers).sort(function(a,b){
         if (a.ts > b.ts){
           return 1;
         } else {
