@@ -65,6 +65,11 @@ module.exports = {
     players.forEach((player) => {
       var call = player.scores[player.scores.length - 1];
       var tricks = player.tricks;
+
+      //Set values for recap
+      player.recapTricks = player.tricks;
+      player.recapCall = player.scores[player.scores.length - 1];
+
       if (tricks != call){
         player.scores[player.scores.length - 1] = "BLOB";
       }

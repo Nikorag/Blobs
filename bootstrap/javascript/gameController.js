@@ -54,6 +54,14 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
     return JSON.parse(JSON.stringify(source));
   }
 
+  $rootScope.recapClass = function(player){
+    if (player.recapCall != player.recapTricks){
+      return "blobbed";
+    } else {
+      return "";
+    }
+  }
+
   //Received Socket Events
     socket.on("gameReset", function(){
       $rootScope.init();

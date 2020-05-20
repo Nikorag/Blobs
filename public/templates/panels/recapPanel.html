@@ -1,0 +1,8 @@
+<div ng-if="gameObject.phase == 'Recap'">
+    <h2>Recap</h2>
+    <ul>
+        <li ng-repeat="player in players">
+            {{player.name}} <span ng-class="recapClass(player)">{{player.recapTricks}}/{{player.recapCall}}</span>&nbsp;<span class="blob" ng-if="player.recapTricks != player.recapCall">BLOB</span>
+        </li>
+    </ul>
+</div>

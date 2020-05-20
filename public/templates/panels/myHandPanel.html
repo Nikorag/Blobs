@@ -1,4 +1,4 @@
-<div ng-if="gameStarted">
+<div ng-if="gameStarted && gameObject.phase != 'Recap'">
     <h2>My Hand</h2>
     <ul class="my_hand_list_{{gameObject.phase}}">
         <li ng-repeat="card in myPlayer.hand" class="cardItem">

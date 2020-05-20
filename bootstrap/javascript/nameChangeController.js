@@ -6,7 +6,9 @@ angular.module('blobs').controller("nameChangeController", ['$rootScope', '$scop
     }
     
     $scope.updateName = function(name){
-        socket.emit("nameChange", name);
+        if (name != undefined){
+            socket.emit("nameChange", name);
+        }
         $('#nameChangeModal').modal("hide");
     }
 

@@ -172,23 +172,32 @@ function nextRound(){
     gameObject.cardsInPlay = [];
     //have we played all the cards?!
     if (playerService.getPlayers()[0].hand.length ==  0){
+
+        //Set phase to recap
+        gameObject.phase = 'Recap'
         //Update Scores
         playerService.updateScores();
-        //Reduce the number of cards
-        gameObject.cardsThisRound--;
-        if (gameObject.cardsThisRound > 0){
-          //Rotate the players
-          gameObject.dealer = playerService.rotateWithNewDealer(gameObject.dealer);
-          //Set phase back to call
-          gameObject.phase = 'Call';
-          //Empty the calls
-          gameObject.calls = [];
-          //Deal new cards
-          dealCards();
-        } else {
-          //TODO game over
-          gameObject.phase == 'End';
-        }
+
+        setTimeout(()=>{
+          
+          //Reduce the number of cards
+          gameObject.cardsThisRound--;
+          if (gameObject.cardsThisRound > 0){
+            //Rotate the players
+            gameObject.dealer = playerService.rotateWithNewDealer(gameObject.dealer);
+            //Set phase back to call
+            gameObject.phase = 'Call';
+            //Empty the calls
+            gameObject.calls = [];
+            //Deal new cards
+            dealCards();
+            messageService.sendGameUpdate(io, gameObject);
+          } else {
+            //TODO game over
+            gameObject.phase == 'End';
+            messageService.sendGameUpdate(io, gameObject);
+          }
+        }, 6000);
     }
   }
 }
