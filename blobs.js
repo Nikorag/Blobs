@@ -57,6 +57,7 @@ io.on('connection', (socket) => {
     playerService.clearPlayers();
     //Reset the game_object
     gameObject = copyService.copy(gameObjectTemplate);
+    io.emit("pendingReset", true);
   });
 
   socket.on('resetGame', () => {

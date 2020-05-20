@@ -8,6 +8,7 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
     $rootScope.sortedPlayers = [];
     $rootScope.myPlayer = {};
     $rootScope.myPlayerIndex = 0;
+    $rootScope.pendingReset = false;
   }
 
   $rootScope.init();
@@ -47,7 +48,7 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
 
   $rootScope.kickAllPlayersAndReset = function(){
     socket.emit("clearPlayers");
-    window.location.reload();
+    $('#areYouSureResetModal').modal("hide");
   }
 
   $rootScope.copy = function(source){
@@ -60,6 +61,10 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
     } else {
       return "";
     }
+  }
+
+  $rootScope.refresh = function(){
+    window.location.reload();
   }
 
   //Received Socket Events
@@ -109,5 +114,9 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
 
     socket.on("showToast", function(toast){
       showToast(toast.title, toast.body);
+    });
+
+    socket.on("pendingReset", function(){
+      $rootScope.pendingReset = true;
     });
 }]);

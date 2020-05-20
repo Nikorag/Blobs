@@ -25,7 +25,7 @@
   <div class="container">
     <div class="row">
 
-      <div class="titlePanel col-xs-12 col-md-8">
+      <div class="titlePanel col-xs-12 col-md-8" ng-if="!pendingReset">
         <h1>Blobs</h1>
         <div ng-controller="gameStatusController" class="gameStatusPanel mobile-only" ng-include="'templates/panels/gameStatusPanel.html'"></div>
         <div ng-controller="actionController" class="actionPanel" ng-include="'templates/panels/actionPanel.html'"></div>
@@ -34,11 +34,17 @@
         <div ng-controller="myHandController" class="myHandPanel" ng-include="'templates/panels/myHandPanel.html'"></div>
         <div ng-if="gameStarted" class="scoresPanel" ng-include="'templates/panels/scoresPanel.html'"></div>
       </div>
-      <div class="col-xs-12 col-md-4">
+      <div class="col-xs-12 col-md-4" ng-if="!pendingReset">
         <div ng-controller="playerController" class="playerPanel {{gameStarted ? 'desktop-only' : ''}}" ng-include="'templates/panels/playerPanel.html'"></div>
         <div ng-controller="gameStatusController" class="gameStatusPanel desktop-only" ng-include="'templates/panels/gameStatusPanel.html'"></div>
         </hr>
         <button type="button" class="resetGameButton fullWidth btn btn-danger" data-toggle="modal" data-target="#areYouSureResetModal">Reset Game</button>
+      </div>
+      <div class="col-12" ng-if="pendingReset">
+        <h1>Blobs</h1>
+        <h2>Game Reset</h2>
+        <p>The Game has been reset, please refresh the page</p>
+        <p><button type="button" class="btn btn-danger" ng-click="refresh()">Or Click Here</button></p>
       </div>
     </div>
     
