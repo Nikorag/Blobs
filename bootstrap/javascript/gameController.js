@@ -85,6 +85,7 @@ angular.module('blobs').controller("gameController", ['$rootScope', '$scope', 's
       var isMyTurn = $rootScope.isMyTurn();
       if ($rootScope.gameStarted && !wasMyTurn && isMyTurn){
         showToast("My Turn", "It's my turn!");
+        window.navigator.vibrate(200,30,300);
       }
     });
 
