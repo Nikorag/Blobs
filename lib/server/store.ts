@@ -23,19 +23,19 @@ return 1
 /**
  * Minimal Webdis client. Webdis (https://webd.is) exposes Redis over HTTP: a POST whose body is
  * `COMMAND/arg1/arg2` (each arg percent-encoded) runs that command and replies with `{"COMMAND": result}`.
- * Credentials may be embedded in the URL (https://user:pass@host) and are sent as HTTP basic auth.
+ * Basic auth: set WEBDIS_USERNAME / WEBDIS_PASSWORD (or embed them in the URL as https://user:pass@host).
  * Behind Cloudflare Access, set CF_ACCESS_CLIENT_ID / CF_ACCESS_CLIENT_SECRET (a service token);
  * WEBDIS_HEADERS (a JSON object) adds any other headers.
  */
 function webdisStore(rawUrl: string): Store {
   const url = new URL(rawUrl);
   const headers: Record<string, string> = {};
-  if (url.username) {
-    const creds = `${decodeURIComponent(url.username)}:${decodeURIComponent(url.password)}`;
-    headers.Authorization = `Basic ${Buffer.from(creds).toString("base64")}`;
-    url.username = "";
-    url.password = "";
-  }
+  const user = process.env.WEBDIS_USERNAME ?? decodeURIComponent(url.username);
+  const password = process.env.WEBDIS_PASSWORD ?? decodeURIComponent(url.password);
+  if (user) headers.Authorization = `Basic ${Buffer.from(`${user}:${password}`).toString("base64")}`;
+  // fetch() rejects URLs with embedded credentials.
+  url.username = "";
+  url.password = "";
   const { CF_ACCESS_CLIENT_ID: cfId, CF_ACCESS_CLIENT_SECRET: cfSecret, WEBDIS_HEADERS: extra } = process.env;
   if (cfId && cfSecret) {
     headers["CF-Access-Client-Id"] = cfId;

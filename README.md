@@ -31,7 +31,7 @@ npm run build
 ## Deploying to Vercel
 
 1. Push the repo and import it in Vercel (no build settings needed).
-2. Add an environment variable `WEBDIS_URL` pointing at your [Webdis](https://webd.is) instance, e.g. `https://user:password@webdis.example.com/` (credentials are optional and sent as HTTP basic auth). Webdis must allow `GET` and `EVAL`.
+2. Add an environment variable `WEBDIS_URL` pointing at your [Webdis](https://webd.is) instance, e.g. `https://webdis.example.com/`. If it uses HTTP basic auth, also set `WEBDIS_USERNAME` and `WEBDIS_PASSWORD` (sent as the `Authorization` header). Webdis must allow `GET` and `EVAL`.
    If Webdis is behind Cloudflare Access, create a service token and set `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET`; they are sent as the `CF-Access-Client-Id` / `CF-Access-Client-Secret` headers. `WEBDIS_HEADERS` (a JSON object) can add any other headers.
 3. Deploy.
 
