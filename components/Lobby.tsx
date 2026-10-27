@@ -1,0 +1,184 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { saveIdentity } from "@/lib/client/identity";
+import { randomName } from "@/lib/client/identity";
+import type { RoomView } from "@/lib/game/types";
+import type { useRoom } from "@/lib/client/useRoom";
+import { Avatar } from "./Avatar";
+import { Logo } from "./Logo";
+import { Rules } from "./Home";
+import { Sheet } from "./Sheet";
+
+type Room = ReturnType<typeof useRoom>;
+
+export function Lobby({ room, view }: { room: Room; view: RoomView }) {
+  const router = useRouter();
+  const [copied, setCopied] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [rules, setRules] = useState(false);
+  const me = view.players.find((p) => p.id === view.you)!;
+  const isHost = view.hostId === view.you;
+  const allReady = view.players.every((p) => p.isHost || p.ready);
+  const canStart = isHost && view.players.length >= 2 && allReady;
+
+  async function share() {
+    const url = `${location.origin}/room/${view.code}`;
+    try {
+      if (navigator.share) await navigator.share({ title: "Join my Blobs game", text: `Join my Blobs game: ${view.code}`, url });
+      else {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1800);
+      }
+    } catch {
+      // user dismissed the share sheet
+    }
+  }
+
+  async function leave() {
+    await room.act({ type: "leave" });
+    router.push("/");
+  }
+
+  let hint = "";
+  if (view.players.length < 2) hint = "Waiting for friends to join…";
+  else if (isHost && !allReady) hint = "Waiting for everyone to get ready…";
+  else if (!isHost) hint = me.ready ? "Waiting for the host to start…" : "Tap ready when you're set.";
+
+  return (
+    <main className="safe-top safe-bottom mx-auto flex min-h-dvh w-full max-w-md flex-col px-5">
+      <header className="flex items-center justify-between py-2">
+        <Logo compact />
+        <button onClick={() => setRules(true)} className="grid size-10 place-items-center rounded-full bg-surface2 font-bold" aria-label="How to play">
+          ?
+        </button>
+      </header>
+
+      <section className="glass anim-pop mt-4 flex flex-col items-center rounded-3xl px-5 py-6">
+        <span className="text-xs font-bold uppercase tracking-widest text-muted">Game code</span>
+        <span className="my-1 text-6xl font-black tracking-[0.25em] text-accent" aria-label={`Game code ${view.code.split("").join(" ")}`}>
+          {view.code}
+        </span>
+        <button onClick={share} className="btn btn-ghost mt-3 !min-h-11 text-sm">
+          {copied ? "Link copied ✓" : "Invite friends"}
+        </button>
+      </section>
+
+      <section className="mt-5 flex-1">
+        <div className="mb-2 flex items-baseline justify-between px-1">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-muted">Players</h2>
+          <span className="text-sm text-muted">{view.players.length}/8</span>
+        </div>
+        <ul className="space-y-2">
+          {view.players.map((p, i) => (
+            <li key={p.id} className="glass flex items-center gap-3 rounded-2xl p-3">
+              <Avatar name={p.name} index={i} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-bold">{p.name}</p>
+                <p className="text-xs font-semibold text-muted">
+                  {p.isHost && <span className="text-accent">Host</span>}
+                  {p.isHost && p.id === view.you && " · "}
+                  {p.id === view.you && "You"}
+                </p>
+              </div>
+              {p.id === view.you && (
+                <button onClick={() => setEditing(true)} className="rounded-full bg-surface2 px-3 py-1.5 text-xs font-bold">
+                  Rename
+                </button>
+              )}
+              {isHost && p.id !== view.you && (
+                <button onClick={() => room.act({ type: "kick", targetId: p.id })} aria-label={`Remove ${p.name}`} className="grid size-8 place-items-center rounded-full bg-bad/15 text-bad">
+                  ×
+                </button>
+              )}
+              {!p.isHost && (
+                <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${p.ready ? "bg-good/20 text-good" : "bg-white/8 text-muted"}`}>
+                  {p.ready ? "Ready" : "Not ready"}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <footer className="space-y-3 pt-4">
+        {hint && <p className="text-center text-sm text-muted">{hint}</p>}
+        {isHost ? (
+          <button className="btn btn-primary w-full" disabled={!canStart || room.busy} onClick={() => room.act({ type: "start" })}>
+            Start game
+          </button>
+        ) : (
+          <button
+            className={`btn w-full ${me.ready ? "btn-ghost" : "btn-primary"}`}
+            disabled={room.busy}
+            onClick={() => room.act({ type: "ready", ready: !me.ready })}
+          >
+            {me.ready ? "Not ready" : "I'm ready"}
+          </button>
+        )}
+        <button onClick={leave} className="block w-full py-2 text-center text-sm font-semibold text-muted">
+          Leave game
+        </button>
+      </footer>
+
+      <RenameSheet
+        key={editing ? "open" : "closed"}
+        open={editing}
+        initial={me.name}
+        onClose={() => setEditing(false)}
+        onSave={async (name) => {
+          saveIdentity({ id: view.you, name });
+          await room.act({ type: "rename", name });
+          setEditing(false);
+        }}
+      />
+      <Sheet open={rules} title="How to play" onClose={() => setRules(false)}>
+        <Rules />
+      </Sheet>
+    </main>
+  );
+}
+
+function RenameSheet({
+  open,
+  initial,
+  onClose,
+  onSave,
+}: {
+  open: boolean;
+  initial: string;
+  onClose: () => void;
+  onSave: (name: string) => void;
+}) {
+  const [name, setName] = useState(initial);
+  return (
+    <Sheet open={open} title="Change name" onClose={onClose}>
+      <form
+        className="space-y-3 pb-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (name.trim()) onSave(name.trim());
+        }}
+      >
+        <div className="flex gap-2">
+          <input
+            autoFocus
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            maxLength={16}
+            aria-label="Name"
+            className="h-13 min-w-0 flex-1 rounded-2xl border border-line bg-black/25 px-4 text-lg font-semibold outline-none focus:border-accent"
+          />
+          <button type="button" aria-label="Random name" onClick={() => setName(randomName())} className="btn btn-ghost !min-h-13 !px-4 text-xl">
+            🎲
+          </button>
+        </div>
+        <button type="submit" className="btn btn-primary w-full" disabled={!name.trim()}>
+          Save
+        </button>
+      </form>
+    </Sheet>
+  );
+}

@@ -1,8 +1,0 @@
-<div ng-if="gameStarted && gameObject.phase != 'Recap'">
-    <h2>My Hand</h2>
-    <ul class="my_hand_list_{{gameObject.phase}}">
-        <li ng-repeat="card in myPlayer.hand" class="cardItem">
-            <img ng-click="playCard(card)" class="card_in_hand can_i_play_{{canIPlay(card)}}" src="https://raw.githubusercontent.com/hayeah/playing-cards-assets/master/svg-cards/{{card.label}}_of_{{card.suit.name}}.svg"/>
-        </li>
-    </ul>
-</div>
