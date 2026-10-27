@@ -41,21 +41,47 @@ function webdisStore(rawUrl: string): Store {
     headers["CF-Access-Client-Id"] = cfId;
     headers["CF-Access-Client-Secret"] = cfSecret;
   }
-  if (extra) Object.assign(headers, JSON.parse(extra));
+  if (extra) {
+    try {
+      Object.assign(headers, JSON.parse(extra));
+    } catch {
+      throw new StoreError("WEBDIS_HEADERS is not valid JSON.");
+    }
+  }
   const endpoint = url.toString();
 
   async function command(...args: (string | number)[]): Promise<unknown> {
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers,
-      body: args.map((a) => encodeURIComponent(String(a))).join("/"),
-      cache: "no-store",
-    });
-    if (!res.ok) throw new Error(`Webdis ${args[0]} failed: HTTP ${res.status}`);
-    const reply = (await res.json()) as Record<string, unknown>;
-    const result = reply[String(args[0]).toUpperCase()] ?? Object.values(reply)[0];
+    const name = String(args[0]);
+    let res: Response;
+    try {
+      res = await fetch(endpoint, {
+        method: "POST",
+        headers,
+        body: args.map((a) => encodeURIComponent(String(a))).join("/"),
+        cache: "no-store",
+        redirect: "manual",
+      });
+    } catch (err) {
+      const cause = (err as { cause?: { code?: string } }).cause?.code ?? (err as Error).message;
+      throw new StoreError(`Can't reach Webdis (${cause}). Check WEBDIS_URL.`);
+    }
+    // Cloudflare Access redirects unauthenticated requests to a login page.
+    if (res.status >= 300 && res.status < 400) {
+      throw new StoreError(`Webdis redirected (HTTP ${res.status}), likely to a Cloudflare Access login. Check CF_ACCESS_CLIENT_ID / CF_ACCESS_CLIENT_SECRET and the Access policy.`);
+    }
+    if (res.status === 401 || res.status === 403) {
+      throw new StoreError(`Webdis rejected the credentials (HTTP ${res.status}). Check WEBDIS_USERNAME / WEBDIS_PASSWORD and the Cloudflare Access service token.`);
+    }
+    if (!res.ok) throw new StoreError(`Webdis ${name} failed with HTTP ${res.status}.`);
+    let reply: Record<string, unknown>;
+    try {
+      reply = (await res.json()) as Record<string, unknown>;
+    } catch {
+      throw new StoreError(`Webdis returned a non-JSON response (${res.headers.get("content-type") ?? "unknown type"}). Is WEBDIS_URL pointing at Webdis?`);
+    }
+    const result = reply[name.toUpperCase()] ?? Object.values(reply)[0];
     // Redis errors come back as [false, "message"].
-    if (Array.isArray(result) && result[0] === false) throw new Error(`Webdis ${args[0]}: ${result[1]}`);
+    if (Array.isArray(result) && result[0] === false) throw new StoreError(`Webdis ${name} error: ${result[1]}`);
     return result;
   }
 
@@ -107,9 +133,17 @@ function createStore(): Store {
 }
 
 const g = globalThis as unknown as { __blobsStore?: Store };
-export const store: Store = (g.__blobsStore ??= createStore());
+// Created on first use so configuration errors surface as normal API errors.
+const backend = () => (g.__blobsStore ??= createStore());
+export const store: Store = {
+  get: (code) => backend().get(code),
+  put: (room, expected) => backend().put(room, expected),
+};
 
 export class ConflictError extends Error {}
+
+/** The storage backend is unreachable or rejected us. The message is safe to show (no secrets). */
+export class StoreError extends Error {}
 
 /**
  * Read-modify-write a room with optimistic concurrency. `fn` may mutate the room freely

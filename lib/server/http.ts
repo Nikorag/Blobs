@@ -1,9 +1,13 @@
 import { GameError } from "@/lib/game/engine";
-import { ConflictError } from "./store";
+import { ConflictError, StoreError } from "./store";
 
 export function errorResponse(err: unknown): Response {
   if (err instanceof GameError) return Response.json({ error: err.message }, { status: 400 });
   if (err instanceof ConflictError) return Response.json({ error: err.message }, { status: 409 });
+  if (err instanceof StoreError) {
+    console.error(err.message);
+    return Response.json({ error: `Storage problem: ${err.message}` }, { status: 502 });
+  }
   console.error(err);
   return Response.json({ error: "Something went wrong" }, { status: 500 });
 }
