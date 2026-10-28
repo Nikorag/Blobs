@@ -90,7 +90,7 @@ function BoardLobby({ view, joinUrl }: { view: RoomView; joinUrl: string }) {
           <ul className="grid flex-1 content-start gap-3 overflow-hidden">
             {view.players.map((p, i) => (
               <li key={p.id} className="glass anim-pop flex items-center gap-4 rounded-2xl p-4">
-                <Avatar name={p.name} index={i} size="lg" />
+                <Avatar index={i} size="lg" />
                 <span className="min-w-0 flex-1 truncate text-3xl font-extrabold">{p.name}</span>
                 {p.isHost ? (
                   <span className="text-lg font-bold text-accent">Host</span>
@@ -201,7 +201,7 @@ function BoardPlayer({ player, index, turn, dealer, phase }: { player: PublicPla
       className={`glass flex min-h-0 flex-1 items-center gap-4 rounded-2xl px-4 ${turn ? "anim-ring" : ""}`}
       style={turn ? { borderColor: "var(--accent)" } : undefined}
     >
-      <Avatar name={player.name} index={index} size="lg" />
+      <Avatar index={index} size="lg" />
       <div className="min-w-0 flex-1">
         <p className="truncate text-2xl font-extrabold">
           {player.name}
@@ -231,7 +231,7 @@ function BoardEnd({ view }: { view: RoomView }) {
           {ranked.map(({ p, i }, pos) => (
             <li key={p.id} className="glass flex items-center gap-4 rounded-2xl p-3">
               <span className="w-8 text-center text-2xl font-black text-muted">{pos + 1}</span>
-              <Avatar name={p.name} index={i} />
+              <Avatar index={i} />
               <span className="min-w-0 flex-1 truncate text-2xl font-bold">{p.name}</span>
               <span className="text-3xl font-black tabular-nums">{p.total}</span>
             </li>

@@ -19,6 +19,11 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [tapped, setTapped] = useState<Card | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
+  // Trick resolution: hold the finished trick on the table with a winner call-out, then sweep it to the winner.
+  const [stage, setStage] = useState<"show" | "sweep" | "done">("done");
+  const [sweepTo, setSweepTo] = useState<Record<string, { dx: number; dy: number }>>({});
+  const targetRefs = useRef(new Map<string, HTMLElement>());
+  const cardRefs = useRef(new Map<string, HTMLElement>());
 
   const meIdx = view.players.findIndex((p) => p.id === view.you);
   const me = view.players[meIdx];
@@ -55,6 +60,37 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
     };
   }, [myTurn]);
 
+  const trickKey = view.lastTrick ? `${view.roundNumber}:${view.lastTrick.cards.map((c) => `${c.card.rank}${c.card.suit}`).join(",")}` : null;
+  const seenTrick = useRef(trickKey);
+  useEffect(() => {
+    if (!trickKey || trickKey === seenTrick.current) return;
+    seenTrick.current = trickKey;
+    const winnerId = view.lastTrick!.winnerId;
+    setStage("show");
+    setSweepTo({});
+    const t1 = setTimeout(() => {
+      const target = targetRefs.current.get(winnerId)?.getBoundingClientRect();
+      const next: Record<string, { dx: number; dy: number }> = {};
+      for (const pc of view.lastTrick!.cards) {
+        const r = cardRefs.current.get(pc.playerId)?.getBoundingClientRect();
+        if (!r || !target) continue;
+        // Aim for the winner's chip, but keep the card on screen if the chip is scrolled out of view.
+        const tx = Math.min(Math.max(target.left + target.width / 2, 24), window.innerWidth - 24);
+        next[pc.playerId] = { dx: tx - (r.left + r.width / 2), dy: target.top + target.height / 2 - (r.top + r.height / 2) };
+      }
+      setSweepTo(next);
+      setStage("sweep");
+      vibrate(winnerId === view.you ? [30, 40, 30] : 12);
+    }, 1600);
+    const t2 = setTimeout(() => setStage("done"), 1600 + 550);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+    // Only a new trick restarts the sequence; later view updates must not cancel it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trickKey]);
+
   // The raised card. Tapping lifts it, tapping again plays it. If only one card is legal it's pre-raised.
   const canPlay = myTurn && view.phase === "Play";
   const selected =
@@ -64,9 +100,12 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
         ? view.playable[0]
         : null;
 
-  const showingLast = view.trick.length === 0 && view.lastTrick;
+  const showingLast = view.trick.length === 0 && view.lastTrick && stage !== "done";
   const tableCards: PlayedCard[] = showingLast ? view.lastTrick!.cards : view.trick;
   const winnerId = showingLast ? view.lastTrick!.winnerId : null;
+  const winnerIdx = view.players.findIndex((p) => p.id === winnerId);
+  // Whoever is about to receive the trick gulps it down as the cards arrive.
+  const gulpId = showingLast && stage === "sweep" ? winnerId : null;
 
   let status: string;
   if (view.phase === "Recap") status = "Round complete";
@@ -124,12 +163,24 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
       {/* Opponents */}
       <section className="no-scrollbar flex gap-2 overflow-x-auto px-4 pb-2" aria-label="Players">
         {opponents.map(({ p, i }) => (
-          <PlayerChip key={p.id} player={p} index={i} turn={view.turnId === p.id} dealer={view.dealerId === p.id} phase={view.phase} />
+          <PlayerChip
+            key={p.id}
+            ref={(el) => {
+              if (el) targetRefs.current.set(p.id, el);
+              else targetRefs.current.delete(p.id);
+            }}
+            player={p}
+            index={i}
+            turn={view.turnId === p.id}
+            dealer={view.dealerId === p.id}
+            phase={view.phase}
+            gulp={gulpId === p.id}
+          />
         ))}
       </section>
 
       {/* Table */}
-      <section className="felt relative mx-4 flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-[2.5rem] px-3">
+      <section className="felt relative z-20 mx-4 flex min-h-0 flex-1 flex-col items-center justify-center rounded-[2.5rem] px-3">
         <p
           aria-live="polite"
           className={`absolute inset-x-0 top-3 text-center text-sm font-bold ${myTurn ? "text-accent" : "text-white/70"}`}
@@ -148,8 +199,18 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
             )}
             {tableCards.map((pc, i) => {
               const winner = winnerId === pc.playerId;
+              const sweeping = showingLast && stage === "sweep";
+              const to = sweepTo[pc.playerId];
               return (
-                <div key={`${pc.card.rank}${pc.card.suit}`} className={`flex flex-col items-center gap-1.5 ${showingLast && !winner ? "opacity-55" : ""}`}>
+                <div
+                  key={`${pc.card.rank}${pc.card.suit}`}
+                  ref={(el) => {
+                    if (el) cardRefs.current.set(pc.playerId, el);
+                    else cardRefs.current.delete(pc.playerId);
+                  }}
+                  style={sweeping && to ? ({ "--dx": `${to.dx}px`, "--dy": `${to.dy}px` } as React.CSSProperties) : undefined}
+                  className={`flex flex-col items-center gap-1.5 ${sweeping ? "anim-sweep" : ""} ${showingLast && !winner && !sweeping ? "opacity-55" : ""}`}
+                >
                   <PlayingCard
                     card={pc.card}
                     size={tableCards.length > 5 ? "md" : "lg"}
@@ -165,17 +226,28 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
           </div>
         )}
 
-        {showingLast && view.phase === "Play" && (
-          <p className="absolute inset-x-0 bottom-3 text-center text-xs font-bold text-accent">
-            {winnerId === view.you ? "You" : nameOf(winnerId)} won the trick
-          </p>
+        {showingLast && stage === "show" && (
+          <div className="anim-pop pointer-events-none absolute inset-0 z-10 grid place-items-center px-4">
+            <div className="jelly-banner flex max-w-full items-center gap-3 rounded-[1.75rem] py-2.5 pl-3 pr-5">
+              <Avatar index={Math.max(winnerIdx, 0)} size="md" className="anim-jiggle" />
+              <p className="min-w-0 truncate text-xl font-bold leading-tight">
+                {winnerId === view.you ? "You win the trick!" : `${nameOf(winnerId)} wins the trick!`}
+              </p>
+            </div>
+          </div>
         )}
       </section>
 
       {/* My status + hand */}
       <section className="safe-bottom pt-3">
         <div className="mb-2 flex items-center justify-between px-5">
-          <div className="flex items-center gap-2">
+          <div
+            ref={(el) => {
+              if (el) targetRefs.current.set(view.you, el);
+              else targetRefs.current.delete(view.you);
+            }}
+            className={`flex items-center gap-2 ${gulpId === view.you ? "anim-gulp" : ""}`}
+          >
             <Avatar index={meIdx} size="sm" />
             <span className="text-sm font-bold">You</span>
             {view.dealerId === view.you && <DealerBadge />}
@@ -240,11 +312,12 @@ function tally(player: { call: number | null; tricks: number }, phase: string) {
   return { text: playing || phase === "Recap" ? `${player.tricks}/${player.call}` : `${player.call}`, cls, glow };
 }
 
-function PlayerChip({ player, index, turn, dealer, phase }: { player: PublicPlayer; index: number; turn: boolean; dealer: boolean; phase: string }) {
+function PlayerChip({ player, index, turn, dealer, phase, gulp, ref }: { player: PublicPlayer; index: number; turn: boolean; dealer: boolean; phase: string; gulp: boolean; ref?: React.Ref<HTMLDivElement> }) {
   const t = tally(player, phase);
   return (
     <div
-      className={`glass relative flex min-w-[5.25rem] flex-1 flex-col items-center gap-1 rounded-2xl px-2 pb-2 pt-2.5 ${turn ? "anim-ring border-accent" : ""}`}
+      ref={ref}
+      className={`glass relative flex min-w-[5.25rem] flex-1 flex-col items-center gap-1 rounded-2xl px-2 pb-2 pt-2.5 ${turn ? "anim-ring border-accent" : ""} ${gulp ? "anim-gulp" : ""}`}
       style={turn ? { borderColor: "var(--accent)" } : undefined}
     >
       <div className="relative">

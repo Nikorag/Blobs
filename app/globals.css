@@ -239,6 +239,51 @@ button,
   animation: jiggle 2.4s ease-in-out infinite;
   transform-origin: 50% 100%;
 }
+
+/* The finished trick is gobbled up by the winner: cards squash down into their blob, which gulps. */
+@keyframes sweep {
+  from {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  80% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translate(var(--dx, 0), var(--dy, 0)) scale(0.28, 0.2);
+  }
+}
+@keyframes gulp {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.12, 0.9);
+  }
+  65% {
+    transform: scale(0.95, 1.08);
+  }
+}
+
+.anim-sweep {
+  animation: sweep 0.5s cubic-bezier(0.5, 0, 0.8, 0.4) both;
+}
+.anim-gulp {
+  animation: gulp 0.45s ease-out 0.35s both;
+}
+
+/* Glossy jelly pill, same lighting as .btn-primary but with a big blob beside the text. */
+.jelly-banner {
+  background: linear-gradient(180deg, #ffe58a 0%, var(--accent) 55%, #f7a925 100%);
+  color: var(--accent-ink);
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.65),
+    inset 0 -3px 6px rgb(190 110 0 / 0.25),
+    0 5px 0 #b87400,
+    0 18px 28px -8px rgb(0 0 0 / 0.6);
+}
 .anim-card-in {
   animation: card-in 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
 }
