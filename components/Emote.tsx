@@ -45,7 +45,7 @@ export function EmotePicker({ onPick, disabled }: { onPick: (emote: (typeof EMOT
         😀
       </button>
       {open && (
-        <div className="anim-pop glass absolute bottom-full left-0 z-30 mb-2 grid grid-cols-4 gap-1 rounded-2xl p-2">
+        <div className="anim-pop glass absolute bottom-full left-0 z-30 mb-2 grid w-max grid-cols-4 gap-1 rounded-2xl p-2">
           {EMOTE_IDS.map((id) => (
             <button
               key={id}
