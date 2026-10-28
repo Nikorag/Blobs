@@ -6,7 +6,8 @@ import { vibrate } from "@/lib/client/identity";
 import type { RoomHandle } from "@/lib/client/roomHandle";
 import type { Card, PlayedCard, PublicPlayer, RoomView } from "@/lib/game/types";
 import { Avatar } from "./Avatar";
-import { PlayingCard } from "./PlayingCard";
+import { useCosmetics } from "./CosmeticsProvider";
+import { cardStyleOf, PlayingCard } from "./PlayingCard";
 import { RecapSheet } from "./RecapSheet";
 import { ScoresSheet } from "./ScoresSheet";
 import { Sheet } from "./Sheet";
@@ -15,6 +16,7 @@ import { SUIT_INFO } from "@/lib/game/cards";
 type Room = RoomHandle;
 
 export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
+  const cosmetics = useCosmetics();
   const [scoresOpen, setScoresOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tapped, setTapped] = useState<Card | null>(null);
@@ -152,7 +154,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
         {trump && trumpInfo && (
           <div className="glass flex items-center gap-2 rounded-xl py-1 pl-2.5 pr-1" aria-label={`Trumps are ${trumpInfo.name}`}>
             <span className="text-[0.6rem] font-bold uppercase leading-none tracking-widest text-muted">Trump</span>
-            <PlayingCard card={trump} size="sm" minimal />
+            <PlayingCard card={trump} size="sm" minimal styleId={cardStyleOf(view, view.dealerId, cosmetics.cards)} />
           </div>
         )}
         <button onClick={() => setScoresOpen(true)} aria-label="Scores" className="grid size-10 place-items-center rounded-full bg-surface2 text-lg">
@@ -212,6 +214,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
                 >
                   <PlayingCard
                     card={pc.card}
+                    styleId={cardStyleOf(view, pc.playerId, cosmetics.cards)}
                     size={tableCards.length > 5 ? "md" : "lg"}
                     className={`anim-card-in ${winner ? "ring-4 ring-accent" : ""}`}
                     style={{ "--tilt": `${((i * 37) % 9) - 4}deg` } as React.CSSProperties}

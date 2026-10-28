@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fredoka } from "next/font/google";
+import { CosmeticsProvider } from "@/components/CosmeticsProvider";
 import { ZontoProvider } from "@/components/ZontoProvider";
 import "./globals.css";
 
@@ -25,7 +26,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${fredoka.variable} h-full antialiased`}>
       <body className="min-h-dvh">
-        <ZontoProvider>{children}</ZontoProvider>
+        <ZontoProvider>
+          <CosmeticsProvider>{children}</CosmeticsProvider>
+        </ZontoProvider>
       </body>
     </html>
   );

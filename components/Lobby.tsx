@@ -2,13 +2,16 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { lockedParts, type Slot } from "@/lib/cosmetics/catalog";
 import { saveIdentity } from "@/lib/client/identity";
 import { randomName } from "@/lib/client/identity";
 import type { RoomView } from "@/lib/game/types";
 import type { RoomHandle } from "@/lib/client/roomHandle";
 import { Avatar } from "./Avatar";
 import { BlobSheet } from "./BlobSheet";
+import { useCosmetics } from "./CosmeticsProvider";
+import { StoreSheet } from "./StoreSheet";
 import { Logo } from "./Logo";
 import { QRCode } from "./QRCode";
 import { Rules } from "./Home";
@@ -27,8 +30,32 @@ export function Lobby({ room, view }: { room: Room; view: RoomView }) {
   const [qr, setQr] = useState(false);
   const [inviting, setInviting] = useState(false);
   const zonto = useZonto();
+  const cosmetics = useCosmetics();
+  const [shopSlot, setShopSlot] = useState<Slot | null>(null);
+  const restored = useRef(false);
   const me = view.players.find((p) => p.id === view.you)!;
   const isHost = view.hostId === view.you;
+
+  const lastSentCards = useRef<string | null>(null);
+  // Put on the blob you designed last time, once your unlocks have loaded.
+  const { status: shopStatus, savedLook, isOwned } = cosmetics;
+  useEffect(() => {
+    if (restored.current || shopStatus !== "ready") return;
+    restored.current = true;
+    if (!savedLook) return;
+    const target = { ...savedLook, cards: cosmetics.cards };
+    if (JSON.stringify(target) !== JSON.stringify(me.look) && lockedParts(target, isOwned).length === 0) {
+      lastSentCards.current = cosmetics.cards;
+      room.act({ type: "look", look: target });
+    }
+  }, [shopStatus, savedLook, isOwned, me.look, room, cosmetics.cards]);
+
+  // Everyone at the table sees your card style, so keep your seat in step with the one you've equipped.
+  useEffect(() => {
+    if (shopStatus !== "ready" || cosmetics.cards === me.look.cards || lastSentCards.current === cosmetics.cards) return;
+    lastSentCards.current = cosmetics.cards;
+    room.act({ type: "look", look: { ...me.look, cards: cosmetics.cards } });
+  }, [shopStatus, cosmetics.cards, me.look, room]);
   const allReady = view.players.every((p) => p.isHost || p.ready);
   const canStart = isHost && view.players.length >= 2 && allReady;
 
@@ -156,7 +183,14 @@ export function Lobby({ room, view }: { room: Room; view: RoomView }) {
           setEditing(false);
         }}
       />
-      <BlobSheet open={designing} look={me.look} onChange={(look) => room.act({ type: "look", look })} onClose={() => setDesigning(false)} />
+      <BlobSheet open={designing} look={me.look} onChange={(look) => {
+          cosmetics.rememberLook(look);
+          room.act({ type: "look", look });
+        }}
+        onClose={() => setDesigning(false)}
+        onShop={setShopSlot}
+      />
+      {shopSlot !== null && <StoreSheet open look={me.look} initialSlot={shopSlot} onClose={() => setShopSlot(null)} />}
       <Sheet open={qr} title="Scan to join" onClose={() => setQr(false)}>
         <div className="flex flex-col items-center gap-4 pb-2">
           {qr && <QRCode value={`${location.origin}/room/${view.code}`} label={`QR code to join game ${view.code}`} className="w-64" />}

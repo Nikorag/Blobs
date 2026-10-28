@@ -7,7 +7,9 @@ import { useEffect, useState } from "react";
 import { ApiError, createRoom, joinRoom } from "@/lib/client/api";
 import { randomName, saveIdentity, useIdentity } from "@/lib/client/identity";
 import { Logo } from "./Logo";
+import { useCosmetics } from "./CosmeticsProvider";
 import { Sheet } from "./Sheet";
+import { StoreSheet } from "./StoreSheet";
 import { SoloSetup } from "./SoloSetup";
 import { useSoloSave } from "@/lib/solo/save";
 import { useZonto } from "./ZontoProvider";
@@ -27,6 +29,8 @@ export function Home() {
 
   const [showAchievements, setShowAchievements] = useState(false);
   const zonto = useZonto();
+  const cosmetics = useCosmetics();
+  const [showStore, setShowStore] = useState(false);
   const { pendingLobby, clearPendingLobby } = zonto;
 
   const ready = identity !== null && name.trim().length > 0;
@@ -150,6 +154,9 @@ export function Home() {
         <Link href="/board" className="underline-offset-4 hover:underline">
           Open the Board
         </Link>
+        <button onClick={() => setShowStore(true)} className="underline-offset-4 hover:underline">
+          Store{cosmetics.status === "ready" && ` · 🪙 ${cosmetics.coins}`}
+        </button>
         {zonto.status === "signedIn" && (
           <>
             <button onClick={() => setShowAchievements(true)} className="underline-offset-4 hover:underline">
@@ -168,6 +175,8 @@ export function Home() {
       </div>
 
       <ZontoAchievementsModal client={zonto.client} open={showAchievements} onClose={() => setShowAchievements(false)} />
+
+      {showStore && <StoreSheet open onClose={() => setShowStore(false)} />}
 
       {showSolo && <SoloSetup open onClose={() => setShowSolo(false)} playerName={name.trim()} />}
 

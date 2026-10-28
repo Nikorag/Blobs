@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { vibrate } from "@/lib/client/identity";
 import type { RoomHandle } from "@/lib/client/roomHandle";
 import type { RoomView } from "@/lib/game/types";
+import { useCoinReward } from "@/lib/cosmetics/useCoinReward";
 import { Avatar } from "./Avatar";
 import { Scoreboard } from "./ScoresSheet";
 
@@ -17,6 +18,7 @@ export function EndScreen({ room, view }: { room: Room; view: RoomView }) {
   const winners = ranked.filter((r) => r.p.total === best);
   const iWon = winners.some((w) => w.p.id === view.you);
   const isHost = view.hostId === view.you;
+  const coins = useCoinReward(view);
 
   useEffect(() => {
     if (iWon) vibrate([100, 50, 100, 50, 300]);
@@ -29,6 +31,7 @@ export function EndScreen({ room, view }: { room: Room; view: RoomView }) {
         <p className="mt-3 text-xs font-bold uppercase tracking-widest text-muted">{winners.length > 1 ? "It's a tie" : "Winner"}</p>
         <h1 className="mt-1 text-4xl font-black text-accent">{winners.map((w) => (w.p.id === view.you ? "You" : w.p.name)).join(" & ")}</h1>
         <p className="mt-1 text-muted">with {best} points</p>
+        {coins > 0 && <p className="anim-pop mt-3 rounded-full bg-surface2 px-4 py-1.5 font-black">+{coins} 🪙</p>}
       </section>
 
       <ol className="space-y-2">
