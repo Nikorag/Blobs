@@ -8,7 +8,7 @@ import type { Card, PlayedCard, PublicPlayer, RoomView } from "@/lib/game/types"
 import { Avatar } from "./Avatar";
 import { useCosmetics } from "./CosmeticsProvider";
 import { EmoteBubble, EmotePicker } from "./Emote";
-import { cardStyleOf, PlayingCard } from "./PlayingCard";
+import { cardStyleOf, cardTilt, PlayingCard } from "./PlayingCard";
 import { RecapSheet } from "./RecapSheet";
 import { ScoresSheet } from "./ScoresSheet";
 import { Sheet } from "./Sheet";
@@ -200,7 +200,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
                 {view.phase === "Call" ? "Calls are made in turn" : "The table is empty"}
               </p>
             )}
-            {tableCards.map((pc, i) => {
+            {tableCards.map((pc) => {
               const winner = winnerId === pc.playerId;
               const sweeping = showingLast && stage === "sweep";
               const to = sweepTo[pc.playerId];
@@ -219,7 +219,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
                     styleId={cardStyleOf(view, pc.playerId, cosmetics.cards)}
                     size={tableCards.length > 5 ? "md" : "lg"}
                     className={`anim-card-in ${winner ? "ring-4 ring-accent" : ""}`}
-                    style={{ "--tilt": `${((i * 37) % 9) - 4}deg` } as React.CSSProperties}
+                    style={cardTilt(pc.card)}
                   />
                   <span className={`max-w-16 truncate text-xs font-bold ${winner ? "text-accent" : "text-white/80"}`}>
                     {pc.playerId === view.you ? "You" : nameOf(pc.playerId)}

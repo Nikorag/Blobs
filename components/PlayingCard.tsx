@@ -11,6 +11,18 @@ export function cardStyleOf(view: { you: string; players: { id: string; look: { 
   return view.players.find((p) => p.id === playerId)?.look.cards ?? "classic";
 }
 
+/**
+ * The angle a card lands on the table at, as a CSS `--tilt` value. Derived from the card itself so it
+ * looks tossed down at random, yet every player (and The Board) sees it land the same way.
+ */
+export function cardTilt(card: Card): React.CSSProperties {
+  let h = card.rank * 2654435761 + card.suit.charCodeAt(0) * 40503;
+  h = Math.imul(h ^ (h >>> 15), 2246822519) >>> 0;
+  let deg = (h % 31) - 15; // -15..15
+  if (Math.abs(deg) < 4) deg = deg < 0 ? -4 - (h % 3) : 4 + (h % 3); // never lands straight
+  return { "--tilt": `${deg}deg` } as React.CSSProperties;
+}
+
 export type CardSize = "xs" | "sm" | "md" | "lg";
 
 const SIZES: Record<CardSize, { box: string; corner: string; pip: string }> = {
