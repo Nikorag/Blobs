@@ -21,6 +21,8 @@ import { useZonto } from "./ZontoProvider";
 
 type Room = RoomHandle;
 
+const LEVELS = ["easy", "normal", "hard"] as const;
+
 export function Lobby({ room, view }: { room: Room; view: RoomView }) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
@@ -142,7 +144,8 @@ export function Lobby({ room, view }: { room: Room; view: RoomView }) {
                   ×
                 </button>
               )}
-              {!p.isHost && (
+              {p.bot && <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-black uppercase tracking-wider text-muted">CPU · {p.bot}</span>}
+              {!p.isHost && !p.bot && (
                 <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${p.ready ? "bg-good/20 text-good" : "bg-white/8 text-muted"}`}>
                   {p.ready ? "Ready" : "Not ready"}
                 </span>
@@ -150,6 +153,21 @@ export function Lobby({ room, view }: { room: Room; view: RoomView }) {
             </li>
           ))}
         </ul>
+        {isHost && view.players.length < 8 && (
+          <div className="mt-3 flex items-center gap-2 px-1">
+            <span className="text-sm font-semibold text-muted">Add CPU</span>
+            {LEVELS.map((level) => (
+              <button
+                key={level}
+                disabled={room.busy}
+                onClick={() => room.act({ type: "addBot", level })}
+                className="rounded-full bg-surface2 px-3 py-1.5 text-xs font-bold capitalize"
+              >
+                {level}
+              </button>
+            ))}
+          </div>
+        )}
       </section>
 
       <footer className="space-y-3 pt-4">

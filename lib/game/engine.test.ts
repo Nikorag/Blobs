@@ -249,3 +249,46 @@ describe("emotes", () => {
     expect(() => applyAction(playing, "p0", { type: "emote", emote: "toString" as never }, ctx(1000))).toThrow(GameError);
   });
 });
+
+describe("computer players in a lobby", () => {
+  it("lets only the host add them, up to the table limit", () => {
+    const room = lobby(2);
+    expect(() => applyAction(room, "p1", { type: "addBot", level: "easy" }, ctx())).toThrow(GameError);
+    applyAction(room, "p0", { type: "addBot", level: "hard" }, ctx());
+    const bot = room.players[2];
+    expect(bot).toMatchObject({ bot: "hard", ready: true });
+    expect(new Set(room.players.map((p) => p.id)).size).toBe(3);
+    for (let i = 0; i < 5; i++) applyAction(room, "p0", { type: "addBot", level: "easy" }, ctx());
+    expect(room.players).toHaveLength(8);
+    expect(() => applyAction(room, "p0", { type: "addBot", level: "easy" }, ctx())).toThrow(GameError);
+    expect(() => applyAction(lobby(2), "p0", { type: "addBot", level: "nope" as never }, ctx())).toThrow(GameError);
+  });
+
+  it("starts with one human and one bot, and the host can remove a bot", () => {
+    const room = lobby(1);
+    applyAction(room, "p0", { type: "addBot", level: "normal" }, ctx());
+    applyAction(room, "p0", { type: "kick", targetId: room.players[1].id }, ctx());
+    expect(room.players).toHaveLength(1);
+    applyAction(room, "p0", { type: "addBot", level: "normal" }, ctx());
+    applyAction(room, "p0", { type: "start" }, ctx());
+    expect(room.phase).toBe("Call");
+  });
+
+  it("never hands the table to a bot and clears it when the last human leaves", () => {
+    const room = lobby(2);
+    applyAction(room, "p0", { type: "addBot", level: "easy" }, ctx());
+    room.players = [room.players[2], room.players[0], room.players[1]]; // bot seated first
+    applyAction(room, "p0", { type: "leave" }, ctx());
+    expect(room.hostId).toBe("p1");
+    applyAction(room, "p1", { type: "leave" }, ctx());
+    expect(room.players).toEqual([]);
+  });
+
+  it("doesn't wait for bots to dismiss the recap", () => {
+    const room = started(2);
+    room.players[1].bot = "easy";
+    while (room.phase !== "Recap") step(room);
+    applyAction(room, "p0", { type: "advance" }, ctx(0));
+    expect(room.phase).not.toBe("Recap");
+  });
+});

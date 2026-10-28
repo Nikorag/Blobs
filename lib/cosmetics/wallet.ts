@@ -55,7 +55,7 @@ const FINISH = 15;
 const WIN = 10;
 const SPOT_ON = 2;
 
-/** Coins a finished game is worth to the viewing player. Games against the computer pay half. */
+/** Coins a finished game is worth to the viewing player. Any game with computer players pays half. */
 export function gameReward(view: RoomView): number {
   if (view.phase !== "End") return 0;
   const best = Math.max(...view.players.map((p) => p.total));
@@ -63,7 +63,7 @@ export function gameReward(view: RoomView): number {
   if (!mine) return 0;
   const spotOn = view.history.filter((r) => r.calls[view.you] === r.tricks[view.you]).length;
   const total = FINISH + (mine.total === best ? WIN : 0) + SPOT_ON * spotOn;
-  return view.code === SOLO_CODE ? Math.ceil(total / 2) : total;
+  return view.code === SOLO_CODE || view.players.some((p) => p.bot) ? Math.ceil(total / 2) : total;
 }
 
 /** A stable id for one finished game (the deals are random, so the scoreline is unique in practice). */

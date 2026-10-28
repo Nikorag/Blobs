@@ -1,3 +1,4 @@
+import type { RoundMemory } from "@/lib/ai/types";
 import type { EmoteId } from "./emotes";
 import type { Look } from "./look";
 
@@ -67,6 +68,8 @@ export interface Room {
   recapReady: string[];
   /** Each player's latest emote (absent on rooms created before emotes existed). */
   emotes?: Record<string, { emote: EmoteId; at: number }>;
+  /** What the computer players remember of the round (public information only). Never sent to clients. */
+  botMemory?: RoundMemory;
 }
 
 export interface PublicPlayer {
@@ -116,6 +119,9 @@ export type Action =
   | { type: "ready"; ready: boolean }
   | { type: "look"; look: Look }
   | { type: "emote"; emote: EmoteId }
+  | { type: "addBot"; level: Difficulty }
+  /** Host only: have the computer player whose turn it is take it. Handled by the server, not the engine. */
+  | { type: "botTurn" }
   | { type: "kick"; targetId: string }
   | { type: "start" }
   | { type: "call"; value: number }

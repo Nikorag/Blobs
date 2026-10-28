@@ -1,4 +1,5 @@
 import { useMemo, useSyncExternalStore } from "react";
+import { randomName } from "@/lib/game/names";
 
 const KEY = "blobs:player";
 
@@ -7,19 +8,7 @@ export interface Identity {
   name: string;
 }
 
-const ADJECTIVES = [
-  "Sneaky", "Jolly", "Lucky", "Cheeky", "Sleepy", "Brave", "Clever", "Wobbly", "Dapper", "Grumpy",
-  "Zesty", "Mighty", "Fuzzy", "Plucky", "Speedy", "Breezy", "Rowdy", "Witty", "Mellow", "Peppy",
-];
-const ANIMALS = [
-  "Otter", "Badger", "Walrus", "Falcon", "Panda", "Gecko", "Moose", "Lemur", "Koala", "Marmot",
-  "Heron", "Ferret", "Newt", "Yak", "Lynx", "Puffin", "Wombat", "Stoat", "Toad", "Bison",
-];
-
-export function randomName(): string {
-  const pick = <T,>(xs: T[]) => xs[Math.floor(Math.random() * xs.length)];
-  return `${pick(ADJECTIVES)} ${pick(ANIMALS)}`;
-}
+export { randomName };
 
 function newId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();

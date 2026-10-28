@@ -14,6 +14,8 @@ export const ACHIEVEMENTS = {
   won: "Top Blob",
   neverBlobbed: "Never Blobbed",
   packedTable: "Packed Table",
+  /** Hidden: its description in the CMS must not give away how it is earned. */
+  mvp: "MVP",
 } as const;
 
 const FULL_TABLE = 8;
@@ -76,13 +78,22 @@ export function earnedAtEnd(view: RoomView): string[] {
   if (view.history.length > 0 && view.history.every((r) => r.calls[me] === r.tricks[me])) {
     earned.push(ACHIEVEMENTS.neverBlobbed);
   }
-  if (view.players.length === FULL_TABLE) earned.push(ACHIEVEMENTS.packedTable);
+  // Computer players don't count towards a packed table.
+  if (view.players.length === FULL_TABLE && view.players.every((p) => !p.bot)) earned.push(ACHIEVEMENTS.packedTable);
   return earned;
+}
+
+const MVP_NAME = "james keatley";
+
+/** The secret one: sitting at the table under a particular name. */
+export function earnedFromName(view: RoomView): string[] {
+  const me = view.players.find((p) => p.id === view.you);
+  return me?.name.trim().replace(/\s+/g, " ").toLowerCase() === MVP_NAME ? [ACHIEVEMENTS.mvp] : [];
 }
 
 /** Everything the viewing player has earned as of this view of the room. */
 export function earnedNow(view: RoomView): string[] {
-  const earned = [...earnedFromRounds(view), ...earnedFromTrick(view)];
+  const earned = [...earnedFromRounds(view), ...earnedFromTrick(view), ...earnedFromName(view)];
   if (view.phase === "End") earned.push(...earnedAtEnd(view));
   return earned;
 }
