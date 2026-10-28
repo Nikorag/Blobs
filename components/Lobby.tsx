@@ -11,7 +11,9 @@ import { Avatar } from "./Avatar";
 import { Logo } from "./Logo";
 import { QRCode } from "./QRCode";
 import { Rules } from "./Home";
+import { InviteSheet } from "./InviteSheet";
 import { Sheet } from "./Sheet";
+import { useZonto } from "./ZontoProvider";
 
 type Room = ReturnType<typeof useRoom>;
 
@@ -21,6 +23,8 @@ export function Lobby({ room, view }: { room: Room; view: RoomView }) {
   const [editing, setEditing] = useState(false);
   const [rules, setRules] = useState(false);
   const [qr, setQr] = useState(false);
+  const [inviting, setInviting] = useState(false);
+  const zonto = useZonto();
   const me = view.players.find((p) => p.id === view.you)!;
   const isHost = view.hostId === view.you;
   const allReady = view.players.every((p) => p.isHost || p.ready);
@@ -67,6 +71,11 @@ export function Lobby({ room, view }: { room: Room; view: RoomView }) {
         <button onClick={share} className="btn btn-ghost mt-3 !min-h-11 text-sm">
           {copied ? "Link copied ✓" : "Invite friends"}
         </button>
+        {zonto.status === "signedIn" && (
+          <button onClick={() => setInviting(true)} className="btn btn-ghost mt-2 !min-h-11 text-sm">
+            Invite Zonto friends
+          </button>
+        )}
         <button onClick={() => setQr(true)} className="mt-2 text-sm font-semibold text-muted underline-offset-4 hover:underline">
           Show QR code
         </button>
@@ -152,6 +161,7 @@ export function Lobby({ room, view }: { room: Room; view: RoomView }) {
       <Sheet open={rules} title="How to play" onClose={() => setRules(false)}>
         <Rules />
       </Sheet>
+      <InviteSheet open={inviting} code={view.code} onClose={() => setInviting(false)} />
     </main>
   );
 }

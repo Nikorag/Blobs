@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { vibrate } from "@/lib/client/identity";
 import type { useRoom } from "@/lib/client/useRoom";
 import type { RoomView } from "@/lib/game/types";
+import { earnedAtEnd } from "@/lib/zonto/achievements";
+import { useZonto } from "./ZontoProvider";
 import { Avatar } from "./Avatar";
 import { Scoreboard } from "./ScoresSheet";
 
@@ -17,6 +19,13 @@ export function EndScreen({ room, view }: { room: Room; view: RoomView }) {
   const winners = ranked.filter((r) => r.p.total === best);
   const iWon = winners.some((w) => w.p.id === view.you);
   const isHost = view.hostId === view.you;
+
+  const { client, status } = useZonto();
+  const earned = earnedAtEnd(view).join("|");
+  useEffect(() => {
+    if (status !== "signedIn" || !earned) return;
+    for (const name of earned.split("|")) client.unlock(name).catch(() => {});
+  }, [client, status, earned]);
 
   useEffect(() => {
     if (iWon) vibrate([100, 50, 100, 50, 300]);

@@ -1,12 +1,14 @@
 "use client";
 
+import { ZontoAchievementsModal } from "@zonto/sdk/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ApiError, createRoom, joinRoom } from "@/lib/client/api";
 import { randomName, saveIdentity, useIdentity } from "@/lib/client/identity";
 import { Logo } from "./Logo";
 import { Sheet } from "./Sheet";
+import { useZonto } from "./ZontoProvider";
 
 export function Home() {
   const router = useRouter();
@@ -18,7 +20,23 @@ export function Home() {
   const [error, setError] = useState<string | null>(null);
   const [showRules, setShowRules] = useState(false);
 
+  const [showAchievements, setShowAchievements] = useState(false);
+  const zonto = useZonto();
+  const { pendingLobby, clearPendingLobby } = zonto;
+
   const ready = identity !== null && name.trim().length > 0;
+
+  // Launched from an accepted Zonto lobby invite: skip the menus and take the seat.
+  useEffect(() => {
+    if (!pendingLobby || !identity) return;
+    clearPendingLobby();
+    const seat = (zonto.player?.gamertag ?? identity.name).slice(0, 16);
+    joinRoom(pendingLobby, identity.id, seat)
+      .then((res) => router.push(`/room/${res.code}`))
+      .catch((err) =>
+        setError(err instanceof ApiError ? (err.status === 404 ? "That invite has expired" : err.message) : "Something went wrong"),
+      );
+  }, [pendingLobby, identity, clearPendingLobby, zonto.player, router]);
 
   async function go(kind: "create" | "join") {
     if (!identity || busy) return;
@@ -111,14 +129,31 @@ export function Home() {
         )}
       </div>
 
-      <div className="mx-auto my-5 flex gap-5 text-sm font-semibold text-muted">
+      <div className="mx-auto my-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-semibold text-muted">
         <button onClick={() => setShowRules(true)} className="underline-offset-4 hover:underline">
           How to play
         </button>
         <Link href="/board" className="underline-offset-4 hover:underline">
           Open the Board
         </Link>
+        {zonto.status === "signedIn" && (
+          <>
+            <button onClick={() => setShowAchievements(true)} className="underline-offset-4 hover:underline">
+              Achievements
+            </button>
+            <button onClick={zonto.signOut} className="underline-offset-4 hover:underline">
+              Signed in as {zonto.player?.gamertag} · Sign out
+            </button>
+          </>
+        )}
+        {zonto.status === "signedOut" && (
+          <button onClick={zonto.signIn} className="text-accent underline-offset-4 hover:underline">
+            Sign in with Zonto
+          </button>
+        )}
       </div>
+
+      <ZontoAchievementsModal client={zonto.client} open={showAchievements} onClose={() => setShowAchievements(false)} />
 
       <Sheet open={showRules} title="How to play" onClose={() => setShowRules(false)}>
         <Rules />
