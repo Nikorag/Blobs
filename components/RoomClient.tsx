@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ApiError, joinRoom } from "@/lib/client/api";
 import { type Identity, saveIdentity, useIdentity } from "@/lib/client/identity";
+import { useBotDriver } from "@/lib/client/useBotDriver";
 import { useRoom } from "@/lib/client/useRoom";
 import { useZontoAchievements } from "@/lib/zonto/useZontoAchievements";
 import { useZontoPlay } from "@/lib/zonto/useZontoPlay";
@@ -17,6 +18,7 @@ export function RoomClient({ code }: { code: string }) {
 
   const room = useRoom(code, identity?.id ?? null);
   const { view, status } = room;
+  useBotDriver(room);
   useZontoPlay(view?.phase === "Call" || view?.phase === "Play" || view?.phase === "Recap");
   useZontoAchievements(view);
 

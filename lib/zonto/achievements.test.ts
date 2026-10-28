@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { RoomView } from "@/lib/game/types";
-import { ACHIEVEMENTS, earnedAtEnd, earnedFromRounds, earnedFromTrick } from "./achievements";
+import { ACHIEVEMENTS, earnedAtEnd, earnedFromName, earnedFromRounds, earnedFromTrick } from "./achievements";
 
 function view(totals: [number, number], rounds: { calls: number; tricks: number }[]): RoomView {
   return {
@@ -100,5 +100,14 @@ describe("packed table", () => {
     const mk = (n: number) => ({ you: "a", players: players(n), history: [] }) as unknown as RoomView;
     expect(earnedAtEnd(mk(8))).toContain(ACHIEVEMENTS.packedTable);
     expect(earnedAtEnd(mk(7))).not.toContain(ACHIEVEMENTS.packedTable);
+  });
+});
+
+describe("earnedFromName", () => {
+  const named = (name: string) => ({ you: "a", players: [{ id: "a", name }, { id: "b", name: "James Keatley" }] }) as unknown as RoomView;
+  it("unlocks MVP for the viewer's own name only, ignoring case and spacing", () => {
+    expect(earnedFromName(named("James Keatley"))).toEqual([ACHIEVEMENTS.mvp]);
+    expect(earnedFromName(named("  james   KEATLEY "))).toEqual([ACHIEVEMENTS.mvp]);
+    expect(earnedFromName(named("James"))).toEqual([]);
   });
 });

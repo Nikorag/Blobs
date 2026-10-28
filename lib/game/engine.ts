@@ -1,6 +1,7 @@
 import { deal, legalPlays, sameCard, trickWinnerIndex } from "./cards";
 import type { Action, Room, RoomView, RoundResult } from "./types";
 import { EMOTE_COOLDOWN_MS, EMOTES } from "./emotes";
+import { randomName } from "./names";
 import { cleanLook, defaultLook } from "./look";
 
 export const MAX_PLAYERS = 8;
@@ -8,6 +9,7 @@ export const MIN_PLAYERS = 2;
 export const MAX_STARTING_CARDS = 7;
 export const RECAP_MS = 8000;
 export const BLOB_SCORE = -1;
+const DIFFICULTIES: readonly string[] = ["easy", "normal", "hard"];
 
 export class GameError extends Error {}
 
@@ -162,7 +164,10 @@ export function applyAction(room: Room, playerId: string, action: Action, ctx: C
     case "leave": {
       if (room.phase !== "Lobby") fail("You can't leave a game in progress");
       room.players.splice(me, 1);
-      if (room.hostId === playerId && room.players.length > 0) room.hostId = room.players[0].id;
+      // Computer players can't host, and a table of only computers has nobody left to run it.
+      const nextHost = room.players.find((p) => !p.bot);
+      if (!nextHost) room.players = [];
+      else if (room.hostId === playerId) room.hostId = nextHost.id;
       return;
     }
 
@@ -173,6 +178,24 @@ export function applyAction(room: Room, playerId: string, action: Action, ctx: C
       room.players = room.players.filter((p) => p.id !== action.targetId);
       return;
     }
+
+    case "addBot": {
+      if (!isHost) fail("Only the host can add computer players");
+      if (room.phase !== "Lobby") fail("You can only add computer players in the lobby");
+      if (room.players.length >= MAX_PLAYERS) fail("That room is full");
+      if (!DIFFICULTIES.includes(action.level)) fail("Unknown difficulty");
+      const taken = new Set(room.players.map((p) => p.name));
+      let name = randomName(ctx.rng);
+      for (let i = 0; i < 20 && taken.has(name); i++) name = randomName(ctx.rng);
+      let id = "";
+      do id = `cpu-${Math.floor(ctx.rng() * 36 ** 6).toString(36).padStart(6, "0")}`;
+      while (room.players.some((p) => p.id === id));
+      room.players.push({ id, name, ready: true, look: defaultLook(room.players.length), hand: [], bot: action.level });
+      return;
+    }
+
+    case "botTurn":
+      return fail("Computer players are driven by the server");
 
     case "start": {
       if (!isHost) fail("Only the host can start the game");
@@ -238,7 +261,8 @@ export function applyAction(room: Room, playerId: string, action: Action, ctx: C
     case "advance": {
       if (room.phase !== "Recap") return; // idempotent: someone else already advanced
       if (!room.recapReady.includes(playerId)) room.recapReady.push(playerId);
-      const everyoneReady = room.players.every((p) => room.recapReady.includes(p.id));
+      // Computer players have nothing to read, so they never hold the recap up.
+      const everyoneReady = room.players.every((p) => p.bot || room.recapReady.includes(p.id));
       const timedOut = room.recapAt !== null && ctx.now >= room.recapAt;
       if (everyoneReady || timedOut) nextRound(room, ctx);
       return;
