@@ -11,6 +11,8 @@ export interface PlayedCard {
   playerId: string;
 }
 
+export type Difficulty = "easy" | "normal" | "hard";
+
 export type Phase = "Lobby" | "Call" | "Play" | "Recap" | "End";
 
 export interface Player {
@@ -18,6 +20,8 @@ export interface Player {
   name: string;
   ready: boolean;
   hand: Card[];
+  /** Set for computer-controlled players. */
+  bot?: Difficulty;
 }
 
 export interface RoundResult {
@@ -69,6 +73,7 @@ export interface PublicPlayer {
   tricks: number;
   total: number;
   isHost: boolean;
+  bot?: Difficulty;
 }
 
 /** What a single player is allowed to see. */

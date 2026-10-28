@@ -8,6 +8,8 @@ import { ApiError, createRoom, joinRoom } from "@/lib/client/api";
 import { randomName, saveIdentity, useIdentity } from "@/lib/client/identity";
 import { Logo } from "./Logo";
 import { Sheet } from "./Sheet";
+import { SoloSetup } from "./SoloSetup";
+import { useSoloSave } from "@/lib/solo/save";
 import { useZonto } from "./ZontoProvider";
 
 export function Home() {
@@ -19,6 +21,9 @@ export function Home() {
   const [busy, setBusy] = useState<"create" | "join" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showRules, setShowRules] = useState(false);
+  const [showSolo, setShowSolo] = useState(false);
+  const soloSave = useSoloSave();
+  const resumable = soloSave && soloSave.room.phase !== "End" ? soloSave : null;
 
   const [showAchievements, setShowAchievements] = useState(false);
   const zonto = useZonto();
@@ -93,6 +98,15 @@ export function Home() {
           {busy === "create" ? "Creating…" : "Create a game"}
         </button>
 
+        <button className="btn btn-ghost w-full" disabled={!ready} onClick={() => setShowSolo(true)}>
+          Play vs CPU
+        </button>
+        {resumable && (
+          <Link href="/solo" className="btn btn-ghost w-full !border-accent/40 text-accent">
+            Resume game · round {resumable.room.roundNumber}
+          </Link>
+        )}
+
         <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-wider text-muted">
           <span className="h-px flex-1 bg-line" />
           or join
@@ -154,6 +168,8 @@ export function Home() {
       </div>
 
       <ZontoAchievementsModal client={zonto.client} open={showAchievements} onClose={() => setShowAchievements(false)} />
+
+      {showSolo && <SoloSetup open onClose={() => setShowSolo(false)} playerName={name.trim()} />}
 
       <Sheet open={showRules} title="How to play" onClose={() => setShowRules(false)}>
         <Rules />

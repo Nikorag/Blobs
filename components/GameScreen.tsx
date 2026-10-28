@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { sameCard } from "@/lib/game/cards";
 import { vibrate } from "@/lib/client/identity";
-import type { useRoom } from "@/lib/client/useRoom";
+import type { RoomHandle } from "@/lib/client/roomHandle";
 import type { Card, PlayedCard, PublicPlayer, RoomView } from "@/lib/game/types";
 import { Avatar } from "./Avatar";
 import { PlayingCard } from "./PlayingCard";
@@ -12,7 +12,7 @@ import { ScoresSheet } from "./ScoresSheet";
 import { Sheet } from "./Sheet";
 import { SUIT_INFO } from "@/lib/game/cards";
 
-type Room = ReturnType<typeof useRoom>;
+type Room = RoomHandle;
 
 export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
   const [scoresOpen, setScoresOpen] = useState(false);
@@ -268,10 +268,21 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
       <ScoresSheet open={scoresOpen} onClose={() => setScoresOpen(false)} view={view} />
       <Sheet open={menuOpen} title="Game" onClose={() => setMenuOpen(false)}>
         <div className="space-y-3 pb-2">
-          <p className="text-sm text-muted">
-            Game code <b className="tracking-[0.3em] text-ink">{view.code}</b>
-          </p>
-          {view.hostId === view.you ? (
+          {!room.solo && (
+            <p className="text-sm text-muted">
+              Game code <b className="tracking-[0.3em] text-ink">{view.code}</b>
+            </p>
+          )}
+          {room.solo ? (
+            <button
+              className="btn btn-danger w-full"
+              onClick={() => {
+                if (confirm("Quit this game? Your progress will be lost.")) room.solo!.quit();
+              }}
+            >
+              Quit game
+            </button>
+          ) : view.hostId === view.you ? (
             <button
               className="btn btn-danger w-full"
               onClick={async () => {
@@ -329,6 +340,11 @@ function PlayerChip({ player, index, turn, dealer, phase, gulp, ref }: { player:
         )}
       </div>
       <p className="max-w-full truncate text-xs font-bold">{player.name}</p>
+      {player.bot && (
+        <span className="-mt-0.5 rounded-full bg-white/10 px-1.5 text-[0.55rem] font-black uppercase tracking-wider text-muted">
+          CPU · {player.bot}
+        </span>
+      )}
       <div className="flex items-center gap-1.5">
         <span style={{ "--glow": t.glow } as React.CSSProperties} className={`glow-num rounded-full px-2 py-0.5 text-sm tabular-nums ${t.cls}`}>
           {t.text}

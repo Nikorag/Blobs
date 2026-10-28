@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { RECAP_MS, scoreFor } from "@/lib/game/engine";
-import type { useRoom } from "@/lib/client/useRoom";
+import type { RoomHandle } from "@/lib/client/roomHandle";
 import type { RoomView } from "@/lib/game/types";
 import { Avatar } from "./Avatar";
 import { Sheet } from "./Sheet";
 
-type Room = ReturnType<typeof useRoom>;
+type Room = RoomHandle;
 
 export function RecapSheet({ room, view }: { room: Room; view: RoomView }) {
   const open = view.phase === "Recap";
