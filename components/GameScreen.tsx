@@ -161,7 +161,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
       </header>
 
       {/* Opponents */}
-      <section className="no-scrollbar flex gap-2 overflow-x-auto px-4 pb-2" aria-label="Players">
+      <section className="no-scrollbar flex gap-2 overflow-x-auto px-4 pb-4" aria-label="Players">
         {opponents.map(({ p, i }) => (
           <PlayerChip
             key={p.id}
