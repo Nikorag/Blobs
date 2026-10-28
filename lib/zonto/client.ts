@@ -2,7 +2,7 @@ import { ZontoClient } from "@zonto/sdk";
 
 const TOKEN_KEY = "blobs:zonto-token";
 
-export const ZONTO_BASE_URL = process.env.NEXT_PUBLIC_ZONTO_BASE_URL || "https://zonto.nikorag.co.uk";
+export const ZONTO_BASE_URL = process.env.NEXT_PUBLIC_ZONTO_BASE_URL || "https://www.nikorag.co.uk";
 export const ZONTO_GAME_SLUG = process.env.NEXT_PUBLIC_ZONTO_GAME_SLUG || "blobs";
 
 export function storedToken(): string | null {
