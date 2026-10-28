@@ -12,8 +12,9 @@ const POLL_HIDDEN_MS = 5000;
 /**
  * Keeps a RoomView fresh by polling (Vercel functions can't hold sockets open) and
  * exposes `act` for sending actions. Action responses update the view immediately.
+ * With `board` set it watches as a spectator (The Board) and never needs a player id.
  */
-export function useRoom(code: string, playerId: string | null) {
+export function useRoom(code: string, playerId: string | null, board = false) {
   const [view, setView] = useState<RoomView | null>(null);
   const [status, setStatus] = useState<RoomStatus>("loading");
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +33,7 @@ export function useRoom(code: string, playerId: string | null) {
   }, []);
 
   useEffect(() => {
-    if (!playerId) return;
+    if (!playerId && !board) return;
     versionRef.current = -1;
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -40,7 +41,7 @@ export function useRoom(code: string, playerId: string | null) {
     const tick = async () => {
       let delay = document.hidden ? POLL_HIDDEN_MS : POLL_VISIBLE_MS;
       try {
-        const res = await pollRoom(code, playerId, versionRef.current);
+        const res = await pollRoom(code, board ? null : playerId, versionRef.current);
         if (cancelled) return;
         if (res.view) accept(res.view);
         else if (res.now) offsetRef.current = res.now - Date.now();
@@ -75,7 +76,7 @@ export function useRoom(code: string, playerId: string | null) {
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("online", onVisible);
     };
-  }, [code, playerId, accept]);
+  }, [code, playerId, board, accept]);
 
   const act = useCallback(
     async (action: Action): Promise<boolean> => {
