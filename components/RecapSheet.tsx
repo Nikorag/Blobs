@@ -43,7 +43,7 @@ export function RecapSheet({ room, view }: { room: Room; view: RoomView }) {
           const blob = score < 0;
           return (
             <li key={p.id} className={`flex items-center gap-3 rounded-2xl border p-3 ${blob ? "border-bad/30 bg-bad/10" : "border-good/30 bg-good/10"}`}>
-              <Avatar name={p.name} index={i} />
+              <Avatar index={i} />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-bold">{p.id === view.you ? "You" : p.name}</p>
                 <p className="text-xs text-muted">

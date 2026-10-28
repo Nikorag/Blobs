@@ -1,21 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #07140f;
-  --bg-2: #0d2419;
-  --surface: rgb(255 255 255 / 0.06);
-  --surface-2: rgb(255 255 255 / 0.1);
-  --border: rgb(255 255 255 / 0.1);
-  --text: #f3f7f4;
-  --muted: #8ea99b;
-  --accent: #f5c451;
-  --accent-ink: #2b1d00;
-  --good: #4ade80;
-  --bad: #fb7185;
-  --felt-1: #17603a;
-  --felt-2: #0b3321;
-  --card-red: #dc2644;
-  --card-black: #151a22;
+  --bg: #0a0e2a;
+  --bg-2: #161c4a;
+  --surface: rgb(160 170 255 / 0.09);
+  --surface-2: rgb(160 170 255 / 0.16);
+  --border: rgb(180 190 255 / 0.16);
+  --text: #f7f5ff;
+  --muted: #9ea7de;
+  --accent: #ffc83d;
+  --accent-ink: #3a2300;
+  --good: #5eeaa0;
+  --bad: #ff6b7a;
+  --felt-1: #2f8f3f;
+  --felt-2: #1b6329;
+  --wood-1: #9a6532;
+  --wood-2: #5c3815;
+  --cream: #fffaea;
+  --cream-2: #f1e6c8;
+  --jelly-coral: #ff6a55;
+  --jelly-teal: #14b8a6;
+  --jelly-yellow: #ffc83d;
+  --jelly-purple: #8b5cf6;
+  --suit-c: #0e9f94;
+  --suit-h: #f0513f;
+  --suit-d: #f28a16;
+  --suit-s: #7c4ddb;
 }
 
 @theme inline {
@@ -30,7 +40,7 @@
   --color-accent-ink: var(--accent-ink);
   --color-good: var(--good);
   --color-bad: var(--bad);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-fredoka);
 }
 
 html {
@@ -40,7 +50,8 @@ html {
 
 body {
   background:
-    radial-gradient(120% 60% at 50% -10%, #145232 0%, transparent 60%),
+    radial-gradient(80% 45% at 85% 0%, rgb(139 92 246 / 0.22), transparent 70%),
+    radial-gradient(70% 40% at 0% 100%, rgb(20 184 166 / 0.16), transparent 70%),
     linear-gradient(180deg, var(--bg-2), var(--bg));
   background-attachment: fixed;
   color: var(--text);
@@ -65,12 +76,16 @@ button,
   padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
 }
 
+/* Green baize with a varnished wooden rim, like the table in the key art. */
 .felt {
   background:
-    radial-gradient(70% 90% at 50% 40%, var(--felt-1), var(--felt-2));
+    radial-gradient(60% 40% at 50% 8%, rgb(255 255 255 / 0.12), transparent 70%),
+    radial-gradient(75% 90% at 50% 45%, var(--felt-1), var(--felt-2));
   box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 0.08),
-    inset 0 12px 40px rgb(0 0 0 / 0.35);
+    inset 0 10px 36px rgb(0 0 0 / 0.35),
+    0 0 0 7px var(--wood-1),
+    0 0 0 10px var(--wood-2),
+    0 18px 40px -8px rgb(0 0 0 / 0.65);
 }
 
 .glass {
@@ -81,39 +96,72 @@ button,
 }
 
 .btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   min-height: 3.25rem;
   padding: 0 1.25rem;
-  border-radius: 1rem;
+  border-radius: 1.25rem;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.05rem;
   transition:
-    transform 0.12s ease,
-    opacity 0.15s ease,
-    background 0.15s ease;
-}
-.btn:active:not(:disabled) {
-  transform: scale(0.97);
+    transform 0.1s ease,
+    box-shadow 0.1s ease,
+    opacity 0.15s ease;
 }
 .btn:disabled {
-  opacity: 0.4;
+  opacity: 0.45;
 }
+/* Glossy jelly: lit from above, a hard "slab" shadow below that squashes on press. */
 .btn-primary {
-  background: linear-gradient(180deg, #ffd56b, var(--accent));
+  background: linear-gradient(180deg, #ffe58a 0%, var(--accent) 55%, #f7a925 100%);
   color: var(--accent-ink);
-  box-shadow: 0 8px 24px -8px rgb(245 196 81 / 0.6);
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.65),
+    inset 0 -3px 6px rgb(190 110 0 / 0.25),
+    0 5px 0 #b87400,
+    0 14px 22px -8px rgb(255 200 61 / 0.5);
+}
+.btn-primary:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 2px 0 rgb(255 255 255 / 0.5),
+    0 2px 0 #b87400,
+    0 6px 12px -6px rgb(255 200 61 / 0.5);
 }
 .btn-ghost {
-  background: var(--surface-2);
+  background: linear-gradient(180deg, rgb(190 200 255 / 0.2), rgb(190 200 255 / 0.1));
   border: 1px solid var(--border);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    0 4px 0 rgb(8 10 40 / 0.7);
+}
+.btn-ghost:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    0 2px 0 rgb(8 10 40 / 0.7);
 }
 .btn-danger {
-  background: rgb(251 113 133 / 0.14);
+  background: rgb(255 107 122 / 0.14);
   color: var(--bad);
-  border: 1px solid rgb(251 113 133 / 0.3);
+  border: 1px solid rgb(255 107 122 / 0.35);
+}
+.btn-danger:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Floating glow numerals, as above each blob in the key art. */
+.glow-num {
+  font-weight: 700;
+  line-height: 1;
+  color: var(--glow, var(--accent));
+  text-shadow:
+    0 0 6px color-mix(in srgb, var(--glow, var(--accent)) 80%, transparent),
+    0 0 16px color-mix(in srgb, var(--glow, var(--accent)) 55%, transparent),
+    0 2px 0 rgb(0 0 0 / 0.25);
 }
 
 @keyframes card-in {
@@ -158,10 +206,10 @@ button,
 @keyframes ring {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgb(245 196 81 / 0.6);
+    box-shadow: 0 0 0 0 rgb(255 200 61 / 0.7);
   }
   50% {
-    box-shadow: 0 0 0 6px rgb(245 196 81 / 0);
+    box-shadow: 0 0 0 6px rgb(255 200 61 / 0);
   }
 }
 @keyframes banner {
@@ -177,6 +225,20 @@ button,
   }
 }
 
+@keyframes jiggle {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.04, 0.96);
+  }
+}
+
+.anim-jiggle {
+  animation: jiggle 2.4s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
 .anim-card-in {
   animation: card-in 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
 }

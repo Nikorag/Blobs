@@ -35,7 +35,7 @@ export function EndScreen({ room, view }: { room: Room; view: RoomView }) {
         {ranked.map(({ p, i }, pos) => (
           <li key={p.id} className="glass flex items-center gap-3 rounded-2xl p-3">
             <span className="w-6 text-center font-black text-muted">{pos + 1}</span>
-            <Avatar name={p.name} index={i} />
+            <Avatar index={i} />
             <span className="min-w-0 flex-1 truncate font-bold">{p.id === view.you ? `${p.name} (you)` : p.name}</span>
             <span className="text-xl font-black tabular-nums">{p.total}</span>
           </li>

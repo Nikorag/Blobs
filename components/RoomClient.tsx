@@ -39,7 +39,7 @@ export function RoomClient({ code }: { code: string }) {
       {room.error && (
         <button
           onClick={room.clearError}
-          className="anim-pop safe-top fixed inset-x-4 top-0 z-50 mx-auto max-w-md rounded-2xl border border-bad/40 bg-[#2a1118] px-4 py-3 text-left text-sm font-semibold text-bad shadow-xl"
+          className="anim-pop safe-top fixed inset-x-4 top-0 z-50 mx-auto max-w-md rounded-2xl border border-bad/40 bg-[#2b1233] px-4 py-3 text-left text-sm font-semibold text-bad shadow-xl"
         >
           {room.error}
         </button>

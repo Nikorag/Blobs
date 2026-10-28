@@ -24,7 +24,7 @@ export function Scoreboard({ view }: { view: RoomView }) {
             {view.players.map((p, i) => (
               <th key={p.id} className="px-1 pb-1">
                 <div className="flex flex-col items-center gap-1">
-                  <Avatar name={p.name} index={i} size="sm" />
+                  <Avatar index={i} size="sm" />
                   <span className="max-w-16 truncate text-xs font-bold">{p.id === view.you ? "You" : p.name}</span>
                 </div>
               </th>

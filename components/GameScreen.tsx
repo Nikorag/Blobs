@@ -129,7 +129,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
       </section>
 
       {/* Table */}
-      <section className="felt relative mx-3 flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-[2rem] px-3">
+      <section className="felt relative mx-4 flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-[2.5rem] px-3">
         <p
           aria-live="polite"
           className={`absolute inset-x-0 top-3 text-center text-sm font-bold ${myTurn ? "text-accent" : "text-white/70"}`}
@@ -176,7 +176,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
       <section className="safe-bottom pt-3">
         <div className="mb-2 flex items-center justify-between px-5">
           <div className="flex items-center gap-2">
-            <Avatar name={me.name} index={meIdx} size="sm" />
+            <Avatar index={meIdx} size="sm" />
             <span className="text-sm font-bold">You</span>
             {view.dealerId === view.you && <DealerBadge />}
           </div>
@@ -229,15 +229,15 @@ function DealerBadge() {
 }
 
 function tally(player: { call: number | null; tricks: number }, phase: string) {
-  if (player.call === null) return { text: "—", cls: "bg-white/10 text-white/60" };
+  if (player.call === null) return { text: "—", cls: "bg-white/10 text-white/60", glow: "#9ea7de" };
   const playing = phase === "Play";
-  const cls =
+  const [cls, glow] =
     !playing || player.tricks < player.call
-      ? "bg-accent/20 text-accent"
+      ? ["bg-accent/15", "var(--accent)"]
       : player.tricks === player.call
-        ? "bg-good/20 text-good"
-        : "bg-bad/20 text-bad";
-  return { text: playing || phase === "Recap" ? `${player.tricks}/${player.call}` : `${player.call}`, cls };
+        ? ["bg-good/15", "var(--good)"]
+        : ["bg-bad/15", "var(--bad)"];
+  return { text: playing || phase === "Recap" ? `${player.tricks}/${player.call}` : `${player.call}`, cls, glow };
 }
 
 function PlayerChip({ player, index, turn, dealer, phase }: { player: PublicPlayer; index: number; turn: boolean; dealer: boolean; phase: string }) {
@@ -248,7 +248,7 @@ function PlayerChip({ player, index, turn, dealer, phase }: { player: PublicPlay
       style={turn ? { borderColor: "var(--accent)" } : undefined}
     >
       <div className="relative">
-        <Avatar name={player.name} index={index} />
+        <Avatar index={index} />
         {dealer && (
           <span className="absolute -right-1 -top-1">
             <DealerBadge />
@@ -257,7 +257,9 @@ function PlayerChip({ player, index, turn, dealer, phase }: { player: PublicPlay
       </div>
       <p className="max-w-full truncate text-xs font-bold">{player.name}</p>
       <div className="flex items-center gap-1.5">
-        <span className={`rounded-full px-2 py-0.5 text-xs font-black tabular-nums ${t.cls}`}>{t.text}</span>
+        <span style={{ "--glow": t.glow } as React.CSSProperties} className={`glow-num rounded-full px-2 py-0.5 text-sm tabular-nums ${t.cls}`}>
+          {t.text}
+        </span>
         <span className="text-[0.7rem] font-semibold text-muted">🂠{player.handCount}</span>
       </div>
     </div>
@@ -270,7 +272,9 @@ function MyScore({ player, phase }: { player: PublicPlayer; phase: string }) {
   return (
     <div className="flex items-center gap-2 text-sm">
       <span className="text-muted">{phase === "Call" ? "Called" : "Won / called"}</span>
-      <span className={`rounded-full px-2.5 py-0.5 font-black tabular-nums ${t.cls}`}>{t.text}</span>
+      <span style={{ "--glow": t.glow } as React.CSSProperties} className={`glow-num rounded-full px-2.5 py-0.5 text-base tabular-nums ${t.cls}`}>
+        {t.text}
+      </span>
     </div>
   );
 }
