@@ -7,6 +7,7 @@ import type { RoomHandle } from "@/lib/client/roomHandle";
 import type { Card, PlayedCard, PublicPlayer, RoomView } from "@/lib/game/types";
 import { Avatar } from "./Avatar";
 import { useCosmetics } from "./CosmeticsProvider";
+import { EmoteBubble, EmotePicker } from "./Emote";
 import { cardStyleOf, PlayingCard } from "./PlayingCard";
 import { RecapSheet } from "./RecapSheet";
 import { ScoresSheet } from "./ScoresSheet";
@@ -172,6 +173,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
               else targetRefs.current.delete(p.id);
             }}
             player={p}
+            serverNow={view.serverNow}
             turn={view.turnId === p.id}
             dealer={view.dealerId === p.id}
             phase={view.phase}
@@ -250,9 +252,13 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
             }}
             className={`flex items-center gap-2 ${gulpId === view.you ? "anim-gulp" : ""}`}
           >
-            <Avatar look={me.look} size="sm" />
+            <div className="relative">
+              <Avatar look={me.look} size="sm" />
+              <EmoteBubble emote={me.emote} serverNow={view.serverNow} className="-top-9 left-0" />
+            </div>
             <span className="text-sm font-bold">You</span>
             {view.dealerId === view.you && <DealerBadge />}
+            {!room.solo && <EmotePicker onPick={(emote) => room.act({ type: "emote", emote })} />}
           </div>
           <MyScore player={me} phase={view.phase} />
         </div>
@@ -325,7 +331,7 @@ function tally(player: { call: number | null; tricks: number }, phase: string) {
   return { text: playing || phase === "Recap" ? `${player.tricks}/${player.call}` : `${player.call}`, cls, glow };
 }
 
-function PlayerChip({ player, turn, dealer, phase, gulp, ref }: { player: PublicPlayer; turn: boolean; dealer: boolean; phase: string; gulp: boolean; ref?: React.Ref<HTMLDivElement> }) {
+function PlayerChip({ player, serverNow, turn, dealer, phase, gulp, ref }: { player: PublicPlayer; serverNow: number; turn: boolean; dealer: boolean; phase: string; gulp: boolean; ref?: React.Ref<HTMLDivElement> }) {
   const t = tally(player, phase);
   return (
     <div
@@ -335,6 +341,7 @@ function PlayerChip({ player, turn, dealer, phase, gulp, ref }: { player: Public
     >
       <div className="relative">
         <Avatar look={player.look} />
+        <EmoteBubble emote={player.emote} serverNow={serverNow} className="-left-3 -top-2" />
         {dealer && (
           <span className="absolute -right-1 -top-1">
             <DealerBadge />
