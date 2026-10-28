@@ -5,17 +5,20 @@ import { normaliseCode, store } from "@/lib/server/store";
 /**
  * Poll for room state. Pass `v` (the last version seen) and, if nothing changed, we
  * reply with a tiny `{ unchanged: true }` instead of the whole view.
+ *
+ * `board=1` is the spectator view used by The Board: no player id needed, and no hands.
  */
 export async function GET(request: Request, ctx: RouteContext<"/api/rooms/[code]">) {
   try {
     const { code } = await ctx.params;
     const url = new URL(request.url);
-    const playerId = url.searchParams.get("pid") ?? "";
+    const board = url.searchParams.get("board") === "1";
+    const playerId = board ? "" : (url.searchParams.get("pid") ?? "");
     const seen = Number(url.searchParams.get("v") ?? -1);
 
     const room = await store.get(normaliseCode(code));
     if (!room) return notFound();
-    if (!room.players.some((p) => p.id === playerId)) {
+    if (!board && !room.players.some((p) => p.id === playerId)) {
       return Response.json({ error: "You are not in this room" }, { status: 403 });
     }
     const headers = { "Cache-Control": "no-store" };

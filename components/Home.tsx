@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ApiError, createRoom, joinRoom } from "@/lib/client/api";
@@ -110,9 +111,14 @@ export function Home() {
         )}
       </div>
 
-      <button onClick={() => setShowRules(true)} className="mx-auto my-5 text-sm font-semibold text-muted underline-offset-4 hover:underline">
-        How to play
-      </button>
+      <div className="mx-auto my-5 flex gap-5 text-sm font-semibold text-muted">
+        <button onClick={() => setShowRules(true)} className="underline-offset-4 hover:underline">
+          How to play
+        </button>
+        <Link href="/board" className="underline-offset-4 hover:underline">
+          Open the Board
+        </Link>
+      </div>
 
       <Sheet open={showRules} title="How to play" onClose={() => setShowRules(false)}>
         <Rules />

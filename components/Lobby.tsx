@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { saveIdentity } from "@/lib/client/identity";
@@ -8,6 +9,7 @@ import type { RoomView } from "@/lib/game/types";
 import type { useRoom } from "@/lib/client/useRoom";
 import { Avatar } from "./Avatar";
 import { Logo } from "./Logo";
+import { QRCode } from "./QRCode";
 import { Rules } from "./Home";
 import { Sheet } from "./Sheet";
 
@@ -18,6 +20,7 @@ export function Lobby({ room, view }: { room: Room; view: RoomView }) {
   const [copied, setCopied] = useState(false);
   const [editing, setEditing] = useState(false);
   const [rules, setRules] = useState(false);
+  const [qr, setQr] = useState(false);
   const me = view.players.find((p) => p.id === view.you)!;
   const isHost = view.hostId === view.you;
   const allReady = view.players.every((p) => p.isHost || p.ready);
@@ -63,6 +66,9 @@ export function Lobby({ room, view }: { room: Room; view: RoomView }) {
         </span>
         <button onClick={share} className="btn btn-ghost mt-3 !min-h-11 text-sm">
           {copied ? "Link copied ✓" : "Invite friends"}
+        </button>
+        <button onClick={() => setQr(true)} className="mt-2 text-sm font-semibold text-muted underline-offset-4 hover:underline">
+          Show QR code
         </button>
       </section>
 
@@ -134,6 +140,15 @@ export function Lobby({ room, view }: { room: Room; view: RoomView }) {
           setEditing(false);
         }}
       />
+      <Sheet open={qr} title="Scan to join" onClose={() => setQr(false)}>
+        <div className="flex flex-col items-center gap-4 pb-2">
+          {qr && <QRCode value={`${location.origin}/room/${view.code}`} label={`QR code to join game ${view.code}`} className="w-64" />}
+          <p className="text-center text-sm text-muted">
+            Point a friend&apos;s camera at this, or put the table on a big screen with{" "}
+            <Link href={`/board/${view.code}`} className="font-semibold text-ink underline underline-offset-4">The Board</Link>.
+          </p>
+        </div>
+      </Sheet>
       <Sheet open={rules} title="How to play" onClose={() => setRules(false)}>
         <Rules />
       </Sheet>

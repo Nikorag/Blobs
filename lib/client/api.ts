@@ -37,7 +37,8 @@ export const joinRoom = (code: string, playerId: string, name: string) =>
 export const sendAction = (code: string, playerId: string, action: Action) =>
   post(`/api/rooms/${code}/action`, { playerId, action }) as Promise<{ view: RoomView }>;
 
-export const pollRoom = (code: string, playerId: string, version: number) =>
+/** Pass `null` as the player to poll as The Board (a read-only spectator). */
+export const pollRoom = (code: string, playerId: string | null, version: number) =>
   request<{ view?: RoomView; unchanged?: boolean; now?: number }>(
-    `/api/rooms/${code}?pid=${encodeURIComponent(playerId)}&v=${version}`,
+    `/api/rooms/${code}?${playerId === null ? "board=1" : `pid=${encodeURIComponent(playerId)}`}&v=${version}`,
   );
