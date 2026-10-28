@@ -23,9 +23,11 @@ interface Props {
   size?: CardSize;
   className?: string;
   style?: React.CSSProperties;
+  /** Just the rank and one central suit symbol, for small displays where the corner index is clutter. */
+  minimal?: boolean;
 }
 
-export function PlayingCard({ card, size = "md", className = "", style }: Props) {
+export function PlayingCard({ card, size = "md", className = "", style, minimal = false }: Props) {
   const s = SIZES[size];
   const suit = SUIT_INFO[card.suit];
   return (
@@ -35,13 +37,22 @@ export function PlayingCard({ card, size = "md", className = "", style }: Props)
       style={{ ...style, color: SUIT_COLOR[card.suit] }}
       className={`relative shrink-0 select-none bg-gradient-to-b from-[var(--cream)] to-[var(--cream-2)] shadow-[inset_0_2px_0_rgb(255_255_255/0.9),0_6px_0_-1px_rgb(120_90_40/0.35),0_10px_16px_-4px_rgb(0_0_0/0.55)] ${s.box} ${className}`}
     >
-      <div className={`absolute left-1.5 top-1 flex flex-col items-center font-bold leading-none [text-shadow:0_1px_0_rgb(0_0_0/0.12)] ${s.corner}`}>
-        <span>{rankLabel(card.rank)}</span>
-        <span className="-mt-px text-[0.85em]">{suit.symbol}</span>
-      </div>
-      <div className={`absolute inset-0 flex items-center justify-center pt-2 leading-none [filter:drop-shadow(0_2px_0_rgb(0_0_0/0.18))] ${s.pip}`}>
-        {suit.symbol}
-      </div>
+      {minimal ? (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 font-bold leading-none [text-shadow:0_1px_0_rgb(0_0_0/0.12)]">
+          <span className={s.corner}>{rankLabel(card.rank)}</span>
+          <span className={`${s.pip} [filter:drop-shadow(0_2px_0_rgb(0_0_0/0.18))]`}>{suit.symbol}</span>
+        </div>
+      ) : (
+        <>
+          <div className={`absolute left-1.5 top-1 flex flex-col items-center font-bold leading-none [text-shadow:0_1px_0_rgb(0_0_0/0.12)] ${s.corner}`}>
+            <span>{rankLabel(card.rank)}</span>
+            <span className="-mt-px text-[0.85em]">{suit.symbol}</span>
+          </div>
+          <div className={`absolute inset-0 flex items-center justify-center pt-2 leading-none [filter:drop-shadow(0_2px_0_rgb(0_0_0/0.18))] ${s.pip}`}>
+            {suit.symbol}
+          </div>
+        </>
+      )}
     </div>
   );
 }
