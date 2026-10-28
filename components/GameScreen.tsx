@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { sameCard } from "@/lib/game/cards";
 import { vibrate } from "@/lib/client/identity";
 import type { RoomHandle } from "@/lib/client/roomHandle";
@@ -15,6 +15,10 @@ import { Sheet } from "./Sheet";
 import { SUIT_INFO } from "@/lib/game/cards";
 
 type Room = RoomHandle;
+
+/** How long the trump card holds in the middle of the table, and how long it takes to fly to the header. */
+const TRUMP_SHOW_MS = 1800;
+const TRUMP_FLY_MS = 600;
 
 export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
   const cosmetics = useCosmetics();
@@ -130,12 +134,76 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
 
   const trump = view.trump;
   const trumpInfo = trump ? SUIT_INFO[trump.suit] : null;
+  const trumpStyle = cardStyleOf(view, view.dealerId, cosmetics.cards);
+
+  // Each round the trump card is shown big in the middle ("Trumps are Clubs"), then flies to its spot in the header.
+  const revealKey = trump ? `${view.roundNumber}:${trump.rank}${trump.suit}` : null;
+  // Joining mid-round shouldn't replay the reveal; arriving at the start of one should.
+  const [skipKey] = useState(() => (view.phase === "Call" && view.players.every((p) => p.call === null) ? null : revealKey));
+  const [revealed, setRevealed] = useState<string | null>(null);
+  const [flight, setFlight] = useState<{ dx: number; dy: number; scale: number } | null>(null);
+  const bigTrumpRef = useRef<HTMLDivElement>(null);
+  const headerTrumpRef = useRef<HTMLSpanElement>(null);
+  const reducedMotion = useSyncExternalStore(
+    () => () => {},
+    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    () => false,
+  );
+  const revealing = revealKey !== null && revealed !== revealKey && !reducedMotion && revealKey !== skipKey;
+
+  useEffect(() => {
+    if (!revealing) return;
+    const key = revealKey;
+    const t1 = setTimeout(() => {
+      const from = bigTrumpRef.current;
+      const to = headerTrumpRef.current?.getBoundingClientRect();
+      if (!from || !to) return setRevealed(key);
+      const a = from.getBoundingClientRect();
+      setFlight({
+        dx: to.left + to.width / 2 - (a.left + a.width / 2),
+        dy: to.top + to.height / 2 - (a.top + a.height / 2),
+        scale: to.width / from.offsetWidth,
+      });
+    }, TRUMP_SHOW_MS);
+    const t2 = setTimeout(() => {
+      setRevealed(key);
+      setFlight(null);
+    }, TRUMP_SHOW_MS + TRUMP_FLY_MS);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+    // `revealing` flips off as soon as the reveal ends; only a new round's key should restart it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealKey]);
 
   return (
     <main className="mx-auto flex h-dvh w-full max-w-md flex-col overflow-hidden">
       {banner && (
         <div className="anim-banner pointer-events-none fixed inset-x-0 top-0 z-30 flex justify-center px-4 safe-top">
           <div className="rounded-full bg-accent px-5 py-2 text-sm font-black text-accent-ink shadow-xl">{banner}</div>
+        </div>
+      )}
+
+      {revealing && trump && trumpInfo && (
+        <div aria-hidden className="pointer-events-none fixed inset-0 z-30 grid place-items-center">
+          <div className={`absolute inset-0 bg-black/50 transition-opacity duration-500 ${flight ? "opacity-0" : "anim-fade"}`} />
+          <div className="relative flex flex-col items-center">
+            <div className="anim-pop mb-16 mt-12">
+              <div
+                ref={bigTrumpRef}
+                style={{
+                  transform: flight ? `translate(${flight.dx}px, ${flight.dy}px) scale(${flight.scale})` : "scale(2.2)",
+                  transition: `transform ${TRUMP_FLY_MS}ms cubic-bezier(0.5, 0, 0.2, 1)`,
+                }}
+              >
+                <PlayingCard card={trump} size="lg" minimal styleId={trumpStyle} />
+              </div>
+            </div>
+            <p className={`text-center text-3xl font-black transition-opacity duration-300 ${flight ? "opacity-0" : "anim-pop"}`}>
+              Trumps are {trumpInfo.name} {trumpInfo.symbol}
+            </p>
+          </div>
         </div>
       )}
 
@@ -155,7 +223,9 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
         {trump && trumpInfo && (
           <div className="glass flex items-center gap-2 rounded-xl py-1 pl-2.5 pr-1" aria-label={`Trumps are ${trumpInfo.name}`}>
             <span className="text-[0.6rem] font-bold uppercase leading-none tracking-widest text-muted">Trump</span>
-            <PlayingCard card={trump} size="sm" minimal styleId={cardStyleOf(view, view.dealerId, cosmetics.cards)} />
+            <span ref={headerTrumpRef} className={`inline-flex ${revealing ? "invisible" : ""}`}>
+              <PlayingCard card={trump} size="sm" minimal styleId={trumpStyle} />
+            </span>
           </div>
         )}
         <button onClick={() => setScoresOpen(true)} aria-label="Scores" className="grid size-10 place-items-center rounded-full bg-surface2 text-lg">
