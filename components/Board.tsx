@@ -7,7 +7,7 @@ import { useRoom } from "@/lib/client/useRoom";
 import type { PlayedCard, PublicPlayer, RoomView } from "@/lib/game/types";
 import { Avatar } from "./Avatar";
 import { Logo } from "./Logo";
-import { PlayingCard } from "./PlayingCard";
+import { cardStyleOf, PlayingCard } from "./PlayingCard";
 import { QRCode } from "./QRCode";
 import { Scoreboard } from "./ScoresSheet";
 
@@ -137,7 +137,7 @@ function BoardGame({ view }: { view: RoomView }) {
         {trump && (
           <div className="glass flex items-center gap-3 rounded-2xl py-2 pl-4 pr-2" aria-label={`Trumps are ${SUIT_INFO[trump.suit].name}`}>
             <span className="text-lg font-bold uppercase tracking-widest text-muted">Trump</span>
-            <PlayingCard card={trump} size="lg" />
+            <PlayingCard card={trump} size="lg" styleId={cardStyleOf(view, view.dealerId, "classic")} />
           </div>
         )}
       </header>
@@ -169,6 +169,7 @@ function BoardGame({ view }: { view: RoomView }) {
                     <div className="origin-top scale-[1.6]">
                       <PlayingCard
                         card={pc.card}
+                        styleId={cardStyleOf(view, pc.playerId, "classic")}
                         size="lg"
                         className={`anim-card-in ${winner ? "ring-4 ring-accent" : ""}`}
                         style={{ "--tilt": `${((i * 37) % 9) - 4}deg` } as React.CSSProperties}

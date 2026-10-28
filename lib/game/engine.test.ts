@@ -220,9 +220,9 @@ describe("look", () => {
     const room = createRoom("ABCD", "a", "Ann", 0);
     joinRoom(room, "b", "Bob");
     const ctx = { now: 0, rng: Math.random };
-    applyAction(room, "b", { type: "look", look: { shape: "egg", eyes: "wink", mouth: "grin", color: 5 } }, ctx);
-    expect(room.players[1].look).toEqual({ shape: "egg", eyes: "wink", mouth: "grin", color: 5 });
-    applyAction(room, "b", { type: "look", look: { shape: "nope", eyes: "dots", mouth: "o", color: 99 } as never }, ctx);
-    expect(room.players[1].look).toEqual({ shape: "egg", eyes: "dots", mouth: "o", color: 5 });
+    applyAction(room, "b", { type: "look", look: { shape: "egg", eyes: "wink", mouth: "grin", skin: "gold", cards: "mint", color: 5 } }, ctx);
+    expect(room.players[1].look).toEqual({ shape: "egg", eyes: "wink", mouth: "grin", skin: "gold", cards: "mint", color: 5 });
+    applyAction(room, "b", { type: "look", look: { shape: "nope", eyes: "dots", mouth: "o", skin: "plain", cards: "classic", color: 99 } as never }, ctx);
+    expect(room.players[1].look).toEqual({ shape: "egg", eyes: "dots", mouth: "o", skin: "plain", cards: "classic", color: 5 });
   });
 });
