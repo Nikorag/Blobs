@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fredoka } from "next/font/google";
+import { ZontoProvider } from "@/components/ZontoProvider";
 import "./globals.css";
 
 const fredoka = Fredoka({ variable: "--font-fredoka", subsets: ["latin"] });
@@ -23,7 +24,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${fredoka.variable} h-full antialiased`}>
-      <body className="min-h-dvh">{children}</body>
+      <body className="min-h-dvh">
+        <ZontoProvider>{children}</ZontoProvider>
+      </body>
     </html>
   );
 }

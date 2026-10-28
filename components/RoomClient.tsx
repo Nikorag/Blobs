@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ApiError, joinRoom } from "@/lib/client/api";
 import { type Identity, saveIdentity, useIdentity } from "@/lib/client/identity";
 import { useRoom } from "@/lib/client/useRoom";
+import { useZontoPlay } from "@/lib/zonto/useZontoPlay";
 import { EndScreen } from "./EndScreen";
 import { GameScreen } from "./GameScreen";
 import { Lobby } from "./Lobby";
@@ -15,6 +16,7 @@ export function RoomClient({ code }: { code: string }) {
 
   const room = useRoom(code, identity?.id ?? null);
   const { view, status } = room;
+  useZontoPlay(view?.phase === "Call" || view?.phase === "Play" || view?.phase === "Recap");
 
   if (!identity || (status === "loading" && !view)) return <Splash text="Finding your table…" />;
   if (status === "notFound") {
