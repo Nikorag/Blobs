@@ -12,6 +12,20 @@ Everyone says up front how many tricks they'll win. Then you play it out: follow
 - You must follow suit if you can. The trick winner leads the next one.
 - Your device remembers who you are, so refreshing or reopening the link drops you back at the table.
 
+## Playing against the computer
+
+**Play vs CPU** on the home screen deals you in against three computer players, each set to Easy, Normal or Hard. The game runs entirely in your browser (no server or Redis involved), saves after every move, and can be resumed from the home screen.
+
+The bots only know what a human at the table could: their own hand, the trump, the calls and the cards played so far.
+
+| Level | How it plays |
+| --- | --- |
+| Easy | Calls from a rough high-card count with some noise, plays sensibly but not carefully, and occasionally throws a random card. |
+| Normal | Counts cards and infers who is out of which suit. Estimates each card's chance of winning, calls the number of tricks it's most likely to hit exactly, then plays whichever card gives the best chance of finishing on that number. |
+| Hard | For every call and card it considers, deals the unseen cards out at random (respecting known voids), plays the rest of the round against Normal opponents, and picks the option with the best average score. Runs in a Web Worker for about 0.4s per move. |
+
+The AI lives in `lib/ai/` as pure functions and the local game controller is in `lib/solo/`. To check relative strength, run `TOURNAMENT=1 npx vitest run lib/ai/ai.test.ts` (set `GAMES`, `ROWS` and `BUDGET` to taste). In a 120-game run Hard hit its call 64% of the time against three Normal bots (Normal hits about 43%) and won the game 56% of the time, where 25% would be even.
+
 ## Running locally
 
 ```bash

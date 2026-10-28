@@ -6,7 +6,7 @@ import { useState } from "react";
 import { saveIdentity } from "@/lib/client/identity";
 import { randomName } from "@/lib/client/identity";
 import type { RoomView } from "@/lib/game/types";
-import type { useRoom } from "@/lib/client/useRoom";
+import type { RoomHandle } from "@/lib/client/roomHandle";
 import { Avatar } from "./Avatar";
 import { Logo } from "./Logo";
 import { QRCode } from "./QRCode";
@@ -15,7 +15,7 @@ import { InviteSheet } from "./InviteSheet";
 import { Sheet } from "./Sheet";
 import { useZonto } from "./ZontoProvider";
 
-type Room = ReturnType<typeof useRoom>;
+type Room = RoomHandle;
 
 export function Lobby({ room, view }: { room: Room; view: RoomView }) {
   const router = useRouter();

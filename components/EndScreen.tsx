@@ -2,12 +2,12 @@
 
 import { useEffect } from "react";
 import { vibrate } from "@/lib/client/identity";
-import type { useRoom } from "@/lib/client/useRoom";
+import type { RoomHandle } from "@/lib/client/roomHandle";
 import type { RoomView } from "@/lib/game/types";
 import { Avatar } from "./Avatar";
 import { Scoreboard } from "./ScoresSheet";
 
-type Room = ReturnType<typeof useRoom>;
+type Room = RoomHandle;
 
 export function EndScreen({ room, view }: { room: Room; view: RoomView }) {
   const ranked = view.players

@@ -270,6 +270,7 @@ export function toView(room: Room, playerId: string, now: number): RoomView {
       tricks: room.tricks[p.id] ?? 0,
       total: totalScore(room, p.id),
       isHost: p.id === room.hostId,
+      bot: p.bot,
     })),
     myHand,
     playable: isMyPlay ? legalPlays(myHand, room.trick) : [],
