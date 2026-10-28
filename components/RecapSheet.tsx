@@ -32,18 +32,18 @@ export function RecapSheet({ room, view }: { room: Room; view: RoomView }) {
   }, [open, recapAt, act, serverNow]);
 
   if (!open || !result) return null;
-  const rows = view.players.map((p, i) => ({ p, i, score: scoreFor(result, p.id), called: result.calls[p.id], won: result.tricks[p.id] }));
+  const rows = view.players.map((p) => ({ p, score: scoreFor(result, p.id), called: result.calls[p.id], won: result.tricks[p.id] }));
   const lastRound = result.cards === 1;
   const progress = recapAt === null ? 0 : Math.min(1, 1 - Math.max(0, recapAt - now) / RECAP_MS);
 
   return (
     <Sheet open title={`Round ${view.history.length} recap`}>
       <ul className="space-y-2">
-        {rows.map(({ p, i, score, called, won }) => {
+        {rows.map(({ p, score, called, won }) => {
           const blob = score < 0;
           return (
             <li key={p.id} className={`flex items-center gap-3 rounded-2xl border p-3 ${blob ? "border-bad/30 bg-bad/10" : "border-good/30 bg-good/10"}`}>
-              <Avatar index={i} />
+              <Avatar look={p.look} />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-bold">{p.id === view.you ? "You" : p.name}</p>
                 <p className="text-xs text-muted">

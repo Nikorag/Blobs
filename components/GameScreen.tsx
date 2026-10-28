@@ -162,7 +162,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
 
       {/* Opponents */}
       <section className="no-scrollbar flex gap-2 overflow-x-auto px-4 pb-4" aria-label="Players">
-        {opponents.map(({ p, i }) => (
+        {opponents.map(({ p }) => (
           <PlayerChip
             key={p.id}
             ref={(el) => {
@@ -170,7 +170,6 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
               else targetRefs.current.delete(p.id);
             }}
             player={p}
-            index={i}
             turn={view.turnId === p.id}
             dealer={view.dealerId === p.id}
             phase={view.phase}
@@ -229,7 +228,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
         {showingLast && stage === "show" && (
           <div className="anim-pop pointer-events-none absolute inset-0 z-10 grid place-items-center px-4">
             <div className="jelly-banner flex max-w-full items-center gap-3 rounded-[1.75rem] py-2.5 pl-3 pr-5">
-              <Avatar index={Math.max(winnerIdx, 0)} size="md" className="anim-jiggle" />
+              <Avatar look={view.players[Math.max(winnerIdx, 0)]?.look} size="md" className="anim-jiggle" />
               <p className="min-w-0 truncate text-xl font-bold leading-tight">
                 {winnerId === view.you ? "You win the trick!" : `${nameOf(winnerId)} wins the trick!`}
               </p>
@@ -248,7 +247,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
             }}
             className={`flex items-center gap-2 ${gulpId === view.you ? "anim-gulp" : ""}`}
           >
-            <Avatar index={meIdx} size="sm" />
+            <Avatar look={me.look} size="sm" />
             <span className="text-sm font-bold">You</span>
             {view.dealerId === view.you && <DealerBadge />}
           </div>
@@ -323,7 +322,7 @@ function tally(player: { call: number | null; tricks: number }, phase: string) {
   return { text: playing || phase === "Recap" ? `${player.tricks}/${player.call}` : `${player.call}`, cls, glow };
 }
 
-function PlayerChip({ player, index, turn, dealer, phase, gulp, ref }: { player: PublicPlayer; index: number; turn: boolean; dealer: boolean; phase: string; gulp: boolean; ref?: React.Ref<HTMLDivElement> }) {
+function PlayerChip({ player, turn, dealer, phase, gulp, ref }: { player: PublicPlayer; turn: boolean; dealer: boolean; phase: string; gulp: boolean; ref?: React.Ref<HTMLDivElement> }) {
   const t = tally(player, phase);
   return (
     <div
@@ -332,7 +331,7 @@ function PlayerChip({ player, index, turn, dealer, phase, gulp, ref }: { player:
       style={turn ? { borderColor: "var(--accent)" } : undefined}
     >
       <div className="relative">
-        <Avatar index={index} />
+        <Avatar look={player.look} />
         {dealer && (
           <span className="absolute -right-1 -top-1">
             <DealerBadge />

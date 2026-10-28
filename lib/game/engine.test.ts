@@ -214,3 +214,15 @@ describe("recap and scoring", () => {
     expect(room.players.every((p) => !p.ready && p.hand.length === 0)).toBe(true);
   });
 });
+
+describe("look", () => {
+  it("lets a player change their blob in the lobby and ignores junk values", () => {
+    const room = createRoom("ABCD", "a", "Ann", 0);
+    joinRoom(room, "b", "Bob");
+    const ctx = { now: 0, rng: Math.random };
+    applyAction(room, "b", { type: "look", look: { shape: "egg", eyes: "wink", mouth: "grin", color: 5 } }, ctx);
+    expect(room.players[1].look).toEqual({ shape: "egg", eyes: "wink", mouth: "grin", color: 5 });
+    applyAction(room, "b", { type: "look", look: { shape: "nope", eyes: "dots", mouth: "o", color: 99 } as never }, ctx);
+    expect(room.players[1].look).toEqual({ shape: "egg", eyes: "dots", mouth: "o", color: 5 });
+  });
+});

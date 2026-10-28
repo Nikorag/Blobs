@@ -88,9 +88,9 @@ function BoardLobby({ view, joinUrl }: { view: RoomView; joinUrl: string }) {
             <span className="text-xl text-muted">{view.players.length}/8</span>
           </div>
           <ul className="grid flex-1 content-start gap-3 overflow-hidden">
-            {view.players.map((p, i) => (
+            {view.players.map((p) => (
               <li key={p.id} className="glass anim-pop flex items-center gap-4 rounded-2xl p-4">
-                <Avatar index={i} size="lg" />
+                <Avatar look={p.look} size="lg" />
                 <span className="min-w-0 flex-1 truncate text-3xl font-extrabold">{p.name}</span>
                 {p.isHost ? (
                   <span className="text-lg font-bold text-accent">Host</span>
@@ -144,8 +144,8 @@ function BoardGame({ view }: { view: RoomView }) {
 
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-6">
         <ol className="flex min-h-0 flex-col gap-3 overflow-hidden" aria-label="Players">
-          {view.players.map((p, i) => (
-            <BoardPlayer key={p.id} player={p} index={i} turn={view.turnId === p.id} dealer={view.dealerId === p.id} phase={view.phase} />
+          {view.players.map((p) => (
+            <BoardPlayer key={p.id} player={p} turn={view.turnId === p.id} dealer={view.dealerId === p.id} phase={view.phase} />
           ))}
         </ol>
 
@@ -188,7 +188,7 @@ function BoardGame({ view }: { view: RoomView }) {
   );
 }
 
-function BoardPlayer({ player, index, turn, dealer, phase }: { player: PublicPlayer; index: number; turn: boolean; dealer: boolean; phase: string }) {
+function BoardPlayer({ player, turn, dealer, phase }: { player: PublicPlayer; turn: boolean; dealer: boolean; phase: string }) {
   const playing = phase === "Play";
   let tally = "—";
   let cls = "bg-white/10 text-white/60";
@@ -201,7 +201,7 @@ function BoardPlayer({ player, index, turn, dealer, phase }: { player: PublicPla
       className={`glass flex min-h-0 flex-1 items-center gap-4 rounded-2xl px-4 ${turn ? "anim-ring" : ""}`}
       style={turn ? { borderColor: "var(--accent)" } : undefined}
     >
-      <Avatar index={index} size="lg" />
+      <Avatar look={player.look} size="lg" />
       <div className="min-w-0 flex-1">
         <p className="truncate text-2xl font-extrabold">
           {player.name}
@@ -228,10 +228,10 @@ function BoardEnd({ view }: { view: RoomView }) {
       </section>
       <section className="flex min-h-0 flex-col gap-3 overflow-hidden">
         <ol className="space-y-2">
-          {ranked.map(({ p, i }, pos) => (
+          {ranked.map(({ p }, pos) => (
             <li key={p.id} className="glass flex items-center gap-4 rounded-2xl p-3">
               <span className="w-8 text-center text-2xl font-black text-muted">{pos + 1}</span>
-              <Avatar index={i} />
+              <Avatar look={p.look} />
               <span className="min-w-0 flex-1 truncate text-2xl font-bold">{p.name}</span>
               <span className="text-3xl font-black tabular-nums">{p.total}</span>
             </li>
