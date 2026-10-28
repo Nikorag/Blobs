@@ -1,3 +1,4 @@
+import type { EmoteId } from "./emotes";
 import type { Look } from "./look";
 
 export type Suit = "c" | "h" | "d" | "s";
@@ -64,6 +65,8 @@ export interface Room {
   /** ms epoch at which the recap auto-advances */
   recapAt: number | null;
   recapReady: string[];
+  /** Each player's latest emote (absent on rooms created before emotes existed). */
+  emotes?: Record<string, { emote: EmoteId; at: number }>;
 }
 
 export interface PublicPlayer {
@@ -78,6 +81,8 @@ export interface PublicPlayer {
   total: number;
   isHost: boolean;
   bot?: Difficulty;
+  /** Their latest emote; the client decides whether it is still fresh. */
+  emote: { emote: EmoteId; at: number } | null;
 }
 
 /** What a single player is allowed to see. */
@@ -110,6 +115,7 @@ export type Action =
   | { type: "rename"; name: string }
   | { type: "ready"; ready: boolean }
   | { type: "look"; look: Look }
+  | { type: "emote"; emote: EmoteId }
   | { type: "kick"; targetId: string }
   | { type: "start" }
   | { type: "call"; value: number }

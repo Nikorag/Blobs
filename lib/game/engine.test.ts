@@ -226,3 +226,26 @@ describe("look", () => {
     expect(room.players[1].look).toEqual({ shape: "egg", eyes: "dots", mouth: "o", skin: "plain", cards: "classic", color: 5 });
   });
 });
+
+describe("emotes", () => {
+  it("shows an emote to everyone, rate limited per player", () => {
+    const room = started(3);
+    applyAction(room, "p1", { type: "emote", emote: "laugh" }, ctx(1000));
+    expect(toView(room, "p0", 1000).players[1].emote).toEqual({ emote: "laugh", at: 1000 });
+    applyAction(room, "p1", { type: "emote", emote: "wow" }, ctx(1500)); // too soon: ignored
+    expect(room.emotes!.p1.emote).toBe("laugh");
+    applyAction(room, "p1", { type: "emote", emote: "wow" }, ctx(2600));
+    expect(room.emotes!.p1.emote).toBe("wow");
+    applyAction(room, "p2", { type: "emote", emote: "party" }, ctx(1100)); // others aren't throttled by p1
+    expect(room.emotes!.p2.emote).toBe("party");
+  });
+
+  it("ignores emotes outside the game and rejects unknown ones", () => {
+    const room = lobby(2);
+    applyAction(room, "p0", { type: "emote", emote: "laugh" }, ctx(1000));
+    expect(room.emotes).toBeUndefined();
+    const playing = started(2);
+    expect(() => applyAction(playing, "p0", { type: "emote", emote: "nope" as never }, ctx(1000))).toThrow(GameError);
+    expect(() => applyAction(playing, "p0", { type: "emote", emote: "toString" as never }, ctx(1000))).toThrow(GameError);
+  });
+});

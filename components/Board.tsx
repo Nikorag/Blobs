@@ -7,6 +7,7 @@ import { useRoom } from "@/lib/client/useRoom";
 import type { PlayedCard, PublicPlayer, RoomView } from "@/lib/game/types";
 import { Avatar } from "./Avatar";
 import { Logo } from "./Logo";
+import { EmoteBubble } from "./Emote";
 import { cardStyleOf, PlayingCard } from "./PlayingCard";
 import { QRCode } from "./QRCode";
 import { Scoreboard } from "./ScoresSheet";
@@ -145,7 +146,7 @@ function BoardGame({ view }: { view: RoomView }) {
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-6">
         <ol className="flex min-h-0 flex-col gap-3 overflow-hidden" aria-label="Players">
           {view.players.map((p) => (
-            <BoardPlayer key={p.id} player={p} turn={view.turnId === p.id} dealer={view.dealerId === p.id} phase={view.phase} />
+            <BoardPlayer key={p.id} player={p} serverNow={view.serverNow} turn={view.turnId === p.id} dealer={view.dealerId === p.id} phase={view.phase} />
           ))}
         </ol>
 
@@ -189,7 +190,7 @@ function BoardGame({ view }: { view: RoomView }) {
   );
 }
 
-function BoardPlayer({ player, turn, dealer, phase }: { player: PublicPlayer; turn: boolean; dealer: boolean; phase: string }) {
+function BoardPlayer({ player, serverNow, turn, dealer, phase }: { player: PublicPlayer; serverNow: number; turn: boolean; dealer: boolean; phase: string }) {
   const playing = phase === "Play";
   let tally = "—";
   let cls = "bg-white/10 text-white/60";
@@ -202,7 +203,10 @@ function BoardPlayer({ player, turn, dealer, phase }: { player: PublicPlayer; tu
       className={`glass flex min-h-0 flex-1 items-center gap-4 rounded-2xl px-4 ${turn ? "anim-ring" : ""}`}
       style={turn ? { borderColor: "var(--accent)" } : undefined}
     >
-      <Avatar look={player.look} size="lg" />
+      <div className="relative">
+        <Avatar look={player.look} size="lg" />
+        <EmoteBubble emote={player.emote} serverNow={serverNow} className="-right-3 top-0 !text-4xl" />
+      </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-2xl font-extrabold">
           {player.name}

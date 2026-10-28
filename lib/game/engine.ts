@@ -1,5 +1,6 @@
 import { deal, legalPlays, sameCard, trickWinnerIndex } from "./cards";
 import type { Action, Room, RoomView, RoundResult } from "./types";
+import { EMOTE_COOLDOWN_MS, EMOTES } from "./emotes";
 import { cleanLook, defaultLook } from "./look";
 
 export const MAX_PLAYERS = 8;
@@ -142,6 +143,16 @@ export function applyAction(room: Room, playerId: string, action: Action, ctx: C
       return;
     }
 
+    case "emote": {
+      if (room.phase === "Lobby" || room.phase === "End") return;
+      if (!Object.hasOwn(EMOTES, action.emote)) fail("Unknown emote");
+      const last = room.emotes?.[playerId];
+      // Too soon after the last one: drop it rather than nagging the sender with an error.
+      if (last && ctx.now - last.at < EMOTE_COOLDOWN_MS) return;
+      (room.emotes ??= {})[playerId] = { emote: action.emote, at: ctx.now };
+      return;
+    }
+
     case "ready": {
       if (room.phase !== "Lobby") fail("The game has already started");
       room.players[me].ready = !!action.ready;
@@ -248,6 +259,7 @@ export function applyAction(room: Room, playerId: string, action: Action, ctx: C
       room.history = [];
       room.recapAt = null;
       room.recapReady = [];
+      room.emotes = {};
       return;
     }
 
@@ -279,6 +291,7 @@ export function toView(room: Room, playerId: string, now: number): RoomView {
       total: totalScore(room, p.id),
       isHost: p.id === room.hostId,
       bot: p.bot,
+      emote: room.emotes?.[p.id] ?? null,
     })),
     myHand,
     playable: isMyPlay ? legalPlays(myHand, room.trick) : [],
