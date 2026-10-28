@@ -80,7 +80,7 @@ export function Lobby({ room, view }: { room: Room; view: RoomView }) {
         <ul className="space-y-2">
           {view.players.map((p, i) => (
             <li key={p.id} className="glass flex items-center gap-3 rounded-2xl p-3">
-              <Avatar name={p.name} index={i} />
+              <Avatar index={i} />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-bold">{p.name}</p>
                 <p className="text-xs font-semibold text-muted">

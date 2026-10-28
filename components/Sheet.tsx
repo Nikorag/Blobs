@@ -27,7 +27,7 @@ export function Sheet({ open, title, onClose, children }: Props) {
         onClick={onClose}
         className="anim-fade absolute inset-0 cursor-default bg-black/60 backdrop-blur-[2px]"
       />
-      <div className="anim-sheet safe-bottom relative flex max-h-[88dvh] w-full max-w-md flex-col rounded-t-[1.75rem] border border-line bg-[#0f2519] px-5 pt-3 shadow-2xl sm:rounded-[1.75rem]">
+      <div className="anim-sheet safe-bottom relative flex max-h-[88dvh] w-full max-w-md flex-col rounded-t-[1.75rem] border border-line bg-[#151a45] px-5 pt-3 shadow-2xl sm:rounded-[1.75rem]">
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/20 sm:hidden" />
         {title && (
           <div className="mb-3 flex items-center justify-between">
