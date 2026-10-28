@@ -3,7 +3,7 @@ import type { Action } from "@/lib/game/types";
 import { errorResponse, notFound, playerIdFrom, readJson } from "@/lib/server/http";
 import { mutateRoom, normaliseCode } from "@/lib/server/store";
 
-const ACTION_TYPES = ["rename", "ready", "kick", "start", "call", "play", "advance", "reset", "leave"];
+const ACTION_TYPES = ["rename", "ready", "look", "kick", "start", "call", "play", "advance", "reset", "leave"];
 
 export async function POST(request: Request, ctx: RouteContext<"/api/rooms/[code]/action">) {
   try {

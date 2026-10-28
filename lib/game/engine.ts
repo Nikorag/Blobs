@@ -1,5 +1,6 @@
 import { deal, legalPlays, sameCard, trickWinnerIndex } from "./cards";
 import type { Action, Room, RoomView, RoundResult } from "./types";
+import { cleanLook, defaultLook } from "./look";
 
 export const MAX_PLAYERS = 8;
 export const MIN_PLAYERS = 2;
@@ -25,7 +26,7 @@ export function createRoom(code: string, hostId: string, hostName: string, now: 
     createdAt: now,
     hostId,
     phase: "Lobby",
-    players: [{ id: hostId, name: cleanName(hostName), ready: false, hand: [] }],
+    players: [{ id: hostId, name: cleanName(hostName), ready: false, look: defaultLook(0), hand: [] }],
     startingCards: MAX_STARTING_CARDS,
     cardsThisRound: MAX_STARTING_CARDS,
     roundNumber: 1,
@@ -55,7 +56,7 @@ export function joinRoom(room: Room, playerId: string, name: string): void {
   if (room.players.some((p) => p.id === playerId)) return;
   if (room.phase !== "Lobby") fail("That game has already started");
   if (room.players.length >= MAX_PLAYERS) fail("That room is full");
-  room.players.push({ id: playerId, name: cleanName(name), ready: false, hand: [] });
+  room.players.push({ id: playerId, name: cleanName(name), ready: false, look: defaultLook(room.players.length), hand: [] });
 }
 
 export function scoreFor(result: RoundResult, playerId: string): number {
@@ -132,6 +133,12 @@ export function applyAction(room: Room, playerId: string, action: Action, ctx: C
       if (room.phase !== "Lobby") fail("You can only rename in the lobby");
       room.players[me].name = cleanName(action.name);
       room.players[me].ready = false;
+      return;
+    }
+
+    case "look": {
+      if (room.phase !== "Lobby") fail("You can only change your blob in the lobby");
+      room.players[me].look = cleanLook(action.look, room.players[me].look);
       return;
     }
 
@@ -265,6 +272,7 @@ export function toView(room: Room, playerId: string, now: number): RoomView {
       id: p.id,
       name: p.name,
       ready: p.ready,
+      look: p.look ?? defaultLook(room.players.indexOf(p)),
       handCount: p.hand.length,
       call: room.calls[p.id] ?? null,
       tricks: room.tricks[p.id] ?? 0,

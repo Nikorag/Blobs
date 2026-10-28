@@ -8,6 +8,7 @@ import { randomName } from "@/lib/client/identity";
 import type { RoomView } from "@/lib/game/types";
 import type { RoomHandle } from "@/lib/client/roomHandle";
 import { Avatar } from "./Avatar";
+import { BlobSheet } from "./BlobSheet";
 import { Logo } from "./Logo";
 import { QRCode } from "./QRCode";
 import { Rules } from "./Home";
@@ -21,6 +22,7 @@ export function Lobby({ room, view }: { room: Room; view: RoomView }) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [designing, setDesigning] = useState(false);
   const [rules, setRules] = useState(false);
   const [qr, setQr] = useState(false);
   const [inviting, setInviting] = useState(false);
@@ -87,9 +89,9 @@ export function Lobby({ room, view }: { room: Room; view: RoomView }) {
           <span className="text-sm text-muted">{view.players.length}/8</span>
         </div>
         <ul className="space-y-2">
-          {view.players.map((p, i) => (
+          {view.players.map((p) => (
             <li key={p.id} className="glass flex items-center gap-3 rounded-2xl p-3">
-              <Avatar index={i} />
+              <Avatar look={p.look} />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-bold">{p.name}</p>
                 <p className="text-xs font-semibold text-muted">
@@ -99,9 +101,14 @@ export function Lobby({ room, view }: { room: Room; view: RoomView }) {
                 </p>
               </div>
               {p.id === view.you && (
-                <button onClick={() => setEditing(true)} className="rounded-full bg-surface2 px-3 py-1.5 text-xs font-bold">
-                  Rename
-                </button>
+                <>
+                  <button onClick={() => setDesigning(true)} className="rounded-full bg-surface2 px-3 py-1.5 text-xs font-bold">
+                    Blob
+                  </button>
+                  <button onClick={() => setEditing(true)} className="rounded-full bg-surface2 px-3 py-1.5 text-xs font-bold">
+                    Rename
+                  </button>
+                </>
               )}
               {isHost && p.id !== view.you && (
                 <button onClick={() => room.act({ type: "kick", targetId: p.id })} aria-label={`Remove ${p.name}`} className="grid size-8 place-items-center rounded-full bg-bad/15 text-bad">
@@ -149,6 +156,7 @@ export function Lobby({ room, view }: { room: Room; view: RoomView }) {
           setEditing(false);
         }}
       />
+      <BlobSheet open={designing} look={me.look} onChange={(look) => room.act({ type: "look", look })} onClose={() => setDesigning(false)} />
       <Sheet open={qr} title="Scan to join" onClose={() => setQr(false)}>
         <div className="flex flex-col items-center gap-4 pb-2">
           {qr && <QRCode value={`${location.origin}/room/${view.code}`} label={`QR code to join game ${view.code}`} className="w-64" />}

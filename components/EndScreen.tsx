@@ -32,10 +32,10 @@ export function EndScreen({ room, view }: { room: Room; view: RoomView }) {
       </section>
 
       <ol className="space-y-2">
-        {ranked.map(({ p, i }, pos) => (
+        {ranked.map(({ p }, pos) => (
           <li key={p.id} className="glass flex items-center gap-3 rounded-2xl p-3">
             <span className="w-6 text-center font-black text-muted">{pos + 1}</span>
-            <Avatar index={i} />
+            <Avatar look={p.look} />
             <span className="min-w-0 flex-1 truncate font-bold">{p.id === view.you ? `${p.name} (you)` : p.name}</span>
             <span className="text-xl font-black tabular-nums">{p.total}</span>
           </li>

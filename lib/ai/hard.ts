@@ -39,6 +39,7 @@ function buildRoom(view: RoomView, hands: Record<string, Card[]>): Room {
     id: p.id,
     name: p.name,
     ready: true,
+    look: p.look,
     hand: p.id === view.you ? view.myHand.map((c) => ({ ...c })) : hands[p.id].map((c) => ({ ...c })),
   }));
   const index = (id: string | null) => players.findIndex((p) => p.id === id);

@@ -1,3 +1,5 @@
+import type { Look } from "./look";
+
 export type Suit = "c" | "h" | "d" | "s";
 
 /** rank runs 2..14 (11 = jack, 12 = queen, 13 = king, 14 = ace) */
@@ -19,6 +21,7 @@ export interface Player {
   id: string;
   name: string;
   ready: boolean;
+  look: Look;
   hand: Card[];
   /** Set for computer-controlled players. */
   bot?: Difficulty;
@@ -67,6 +70,7 @@ export interface PublicPlayer {
   id: string;
   name: string;
   ready: boolean;
+  look: Look;
   handCount: number;
   /** call for the current round, if made */
   call: number | null;
@@ -105,6 +109,7 @@ export interface RoomView {
 export type Action =
   | { type: "rename"; name: string }
   | { type: "ready"; ready: boolean }
+  | { type: "look"; look: Look }
   | { type: "kick"; targetId: string }
   | { type: "start" }
   | { type: "call"; value: number }

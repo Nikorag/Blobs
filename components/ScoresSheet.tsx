@@ -21,10 +21,10 @@ export function Scoreboard({ view }: { view: RoomView }) {
         <thead>
           <tr>
             <th className="pb-1 text-left text-xs font-bold uppercase tracking-wider text-muted">Cards</th>
-            {view.players.map((p, i) => (
+            {view.players.map((p) => (
               <th key={p.id} className="px-1 pb-1">
                 <div className="flex flex-col items-center gap-1">
-                  <Avatar index={i} size="sm" />
+                  <Avatar look={p.look} size="sm" />
                   <span className="max-w-16 truncate text-xs font-bold">{p.id === view.you ? "You" : p.name}</span>
                 </div>
               </th>
