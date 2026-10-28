@@ -152,7 +152,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
         {trump && trumpInfo && (
           <div className="glass flex items-center gap-2 rounded-xl py-1 pl-2.5 pr-1" aria-label={`Trumps are ${trumpInfo.name}`}>
             <span className="text-[0.6rem] font-bold uppercase leading-none tracking-widest text-muted">Trump</span>
-            <PlayingCard card={trump} size="xs" />
+            <PlayingCard card={trump} size="sm" minimal />
           </div>
         )}
         <button onClick={() => setScoresOpen(true)} aria-label="Scores" className="grid size-10 place-items-center rounded-full bg-surface2 text-lg">
@@ -349,7 +349,6 @@ function PlayerChip({ player, index, turn, dealer, phase, gulp, ref }: { player:
         <span style={{ "--glow": t.glow } as React.CSSProperties} className={`glow-num rounded-full px-2 py-0.5 text-sm tabular-nums ${t.cls}`}>
           {t.text}
         </span>
-        <span className="text-[0.7rem] font-semibold text-muted">🂠{player.handCount}</span>
       </div>
     </div>
   );
