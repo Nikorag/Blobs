@@ -8,7 +8,7 @@ import type { PlayedCard, PublicPlayer, RoomView } from "@/lib/game/types";
 import { Avatar } from "./Avatar";
 import { Logo } from "./Logo";
 import { EmoteBubble } from "./Emote";
-import { cardStyleOf, PlayingCard } from "./PlayingCard";
+import { cardStyleOf, cardTilt, PlayingCard } from "./PlayingCard";
 import { QRCode } from "./QRCode";
 import { Scoreboard } from "./ScoresSheet";
 
@@ -163,7 +163,7 @@ function BoardGame({ view }: { view: RoomView }) {
               {tableCards.length === 0 && (
                 <p className="text-2xl text-white/40">{view.phase === "Call" ? "Calls are made in turn" : "The table is empty"}</p>
               )}
-              {tableCards.map((pc, i) => {
+              {tableCards.map((pc) => {
                 const winner = winnerId === pc.playerId;
                 return (
                   <div key={`${pc.card.rank}${pc.card.suit}`} className={`flex flex-col items-center gap-2 ${showingLast && !winner ? "opacity-55" : ""}`}>
@@ -173,7 +173,7 @@ function BoardGame({ view }: { view: RoomView }) {
                         styleId={cardStyleOf(view, pc.playerId, "classic")}
                         size="lg"
                         className={`anim-card-in ${winner ? "ring-4 ring-accent" : ""}`}
-                        style={{ "--tilt": `${((i * 37) % 9) - 4}deg` } as React.CSSProperties}
+                        style={cardTilt(pc.card)}
                       />
                     </div>
                     <span className={`mt-[4.5rem] max-w-40 truncate text-2xl font-bold ${winner ? "text-accent" : "text-white/85"}`}>
