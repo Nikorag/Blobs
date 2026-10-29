@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CARD_STYLES, type Slot, SLOTS, SLOT_LABEL, price } from "@/lib/cosmetics/catalog";
-import { EYES, type Look, MOUTHS, SHAPES, SKINS, defaultLook } from "@/lib/game/look";
+import { EYES, HATS, type Look, MOUTHS, SHAPES, SKINS, defaultLook } from "@/lib/game/look";
 import { Avatar } from "./Avatar";
 import { useCosmetics } from "./CosmeticsProvider";
 import { PlayingCard } from "./PlayingCard";
@@ -22,6 +22,7 @@ const IDS: Record<Slot, readonly string[]> = {
   eyes: EYES,
   mouth: MOUTHS,
   skin: SKINS,
+  hat: HATS,
   cards: CARD_STYLES,
 };
 
