@@ -1,4 +1,4 @@
-import { type Eyes, HUES, type Look, type Mouth, type Shape, type Skin, defaultLook } from "@/lib/game/look";
+import { type Eyes, HUES, type Hat, type Look, type Mouth, type Shape, type Skin, defaultLook } from "@/lib/game/look";
 
 export function avatarHue(color: number): number {
   return HUES[color % HUES.length];
@@ -126,6 +126,51 @@ const MOUTH_CLASS: Record<Mouth, string> = {
   cat: "h-[10%] w-[26%] rounded-b-full border-b-[0.12em] before:absolute before:left-[-6%] before:top-0 before:h-full before:w-1/2 before:rounded-b-full before:border-b-[0.12em] before:border-[#3b1d2e]/85",
 };
 
+const HATS_NODE: Record<Hat, React.ReactNode> = {
+  none: null,
+  cap: (
+    <>
+      <span className="absolute left-[18%] top-[-6%] h-[28%] w-[64%] rounded-t-full bg-[#e5484d]" />
+      <span className="absolute left-[44%] top-[17%] h-[6%] w-[44%] rounded-full bg-[#b8272c]" />
+    </>
+  ),
+  beanie: (
+    <>
+      <span className="absolute left-[44%] top-[-14%] size-[13%] rounded-full bg-white" />
+      <span className="absolute left-[16%] top-[-6%] h-[28%] w-[68%] rounded-t-full bg-[#4d96ff]" />
+      <span className="absolute left-[14%] top-[14%] h-[8%] w-[72%] rounded-full bg-[#2f6fd1]" />
+    </>
+  ),
+  party: (
+    <>
+      <span className="absolute left-[33%] top-[-26%] h-[38%] w-[34%] bg-[linear-gradient(160deg,#ff6bd6,#ffd93d)] [clip-path:polygon(50%_0,100%_100%,0_100%)]" />
+      <span className="absolute left-[44%] top-[-30%] size-[12%] rounded-full bg-[#ffd93d]" />
+    </>
+  ),
+  cowboy: (
+    <>
+      <span className="absolute left-[30%] top-[-8%] h-[22%] w-[40%] rounded-t-[45%] bg-[#a8683a]" />
+      <span className="absolute left-[6%] top-[9%] h-[9%] w-[88%] rounded-full bg-[#8a4f26]" />
+    </>
+  ),
+  halo: <span className="absolute left-[27%] top-[-14%] h-[10%] w-[46%] rounded-full border-[0.07em] border-[#ffe14d] shadow-[0_0_0.2em_#ffe14d]" />,
+  tophat: (
+    <>
+      <span className="absolute left-[31%] top-[-22%] h-[32%] w-[38%] rounded-t-[12%] bg-[#2a1630]" />
+      <span className="absolute left-[31%] top-[0%] h-[6%] w-[38%] bg-[#e5484d]" />
+      <span className="absolute left-[18%] top-[9%] h-[6%] w-[64%] rounded-full bg-[#2a1630]" />
+    </>
+  ),
+  wizard: (
+    <>
+      <span className="absolute left-[26%] top-[-36%] h-[48%] w-[48%] bg-[#5b3cc4] [clip-path:polygon(55%_0,100%_100%,0_100%)]" />
+      <span className="absolute left-[44%] top-[-14%] text-[0.18em] leading-none text-[#ffe14d]">★</span>
+      <span className="absolute left-[14%] top-[9%] h-[7%] w-[72%] rounded-full bg-[#46299c]" />
+    </>
+  ),
+  crown: <span className="absolute left-[25%] top-[-12%] h-[26%] w-[50%] bg-[linear-gradient(180deg,#fff3b0,#f2c230_60%,#b9810c)] [clip-path:polygon(0_100%,0_20%,25%_55%,50%_0,75%_55%,100%_20%,100%_100%)]" />,
+};
+
 const GLITTER =
   "radial-gradient(circle at 20% 30%, #fff 0 4%, transparent 5%), radial-gradient(circle at 70% 20%, #fff 0 3%, transparent 4%), radial-gradient(circle at 55% 60%, #fff 0 4%, transparent 5%), radial-gradient(circle at 25% 75%, #fff 0 3%, transparent 4%), radial-gradient(circle at 80% 70%, #fff 0 3%, transparent 4%), radial-gradient(circle at 45% 12%, #fff 0 2%, transparent 3%)";
 
@@ -151,7 +196,7 @@ function skinPaint(skin: Skin, h: number): { base?: string; overlay?: string } {
 
 /** A glossy jelly blob with a little face. */
 export function Avatar({ look, index = 0, size = "md", className = "" }: Props) {
-  const { shape, eyes, mouth, skin, color } = look ?? defaultLook(index);
+  const { shape, eyes, mouth, skin, hat, color } = look ?? defaultLook(index);
   const h = avatarHue(color);
   const paint = skinPaint(skin, h);
   return (
@@ -170,6 +215,7 @@ export function Avatar({ look, index = 0, size = "md", className = "" }: Props) 
       <span className="absolute left-[56%] top-[14%] size-[8%] rounded-full bg-white/60" />
       {EYES_NODE[eyes]}
       <span className={`absolute left-1/2 top-[64%] -translate-x-1/2 border-[#3b1d2e]/85 ${MOUTH_CLASS[mouth]}`} />
+      {HATS_NODE[hat]}
     </div>
   );
 }

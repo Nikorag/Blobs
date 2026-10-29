@@ -1,6 +1,6 @@
 "use client";
 
-import { EYES, HUES, type Look, MOUTHS, SHAPES, SKINS } from "@/lib/game/look";
+import { EYES, HATS, HUES, type Look, MOUTHS, SHAPES, SKINS } from "@/lib/game/look";
 import { type Slot, price } from "@/lib/cosmetics/catalog";
 import { Avatar, avatarColor } from "./Avatar";
 import { useCosmetics } from "./CosmeticsProvider";
@@ -50,6 +50,13 @@ export function BlobSheet({ open, look, onChange, onClose, onShop }: Props) {
           {SKINS.map((skin) => (
             <Choice key={skin} name={skin} selected={look.skin === skin} cost={isOwned("skin", skin) ? 0 : price("skin", skin)} onPick={() => (isOwned("skin", skin) ? onChange({ ...look, skin }) : onShop("skin"))}>
               <Avatar look={{ ...look, skin }} size="md" />
+            </Choice>
+          ))}
+        </Group>
+        <Group label="Hat">
+          {HATS.map((hat) => (
+            <Choice key={hat} name={hat} selected={look.hat === hat} cost={isOwned("hat", hat) ? 0 : price("hat", hat)} onPick={() => (isOwned("hat", hat) ? onChange({ ...look, hat }) : onShop("hat"))}>
+              <Avatar look={{ ...look, hat }} size="md" />
             </Choice>
           ))}
         </Group>
