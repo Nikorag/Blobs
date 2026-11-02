@@ -95,6 +95,12 @@ button,
   -webkit-backdrop-filter: blur(14px);
 }
 
+/* Focus ring while a gamepad is driving the UI (set by GamepadNavigator). */
+.pad-active :focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
 .btn {
   position: relative;
   display: inline-flex;

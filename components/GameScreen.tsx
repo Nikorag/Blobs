@@ -510,6 +510,7 @@ function Hand({
             key={`${card.rank}${card.suit}`}
             onClick={() => onTap(card)}
             disabled={disabled}
+            data-pad-default={myTurn && isPlayable ? "" : undefined}
             aria-label={`${card.rank} of ${card.suit}${isSelected ? ", selected. Tap again to play" : ""}`}
             style={{ marginLeft: i === 0 ? 0 : gap, zIndex: i }}
             className={`relative shrink-0 rounded-xl transition-all duration-200 ${isSelected ? "-translate-y-5" : myTurn && isPlayable ? "-translate-y-2" : ""} ${dim ? "brightness-[.55] saturate-50" : ""}`}
