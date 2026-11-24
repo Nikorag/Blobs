@@ -47,8 +47,9 @@ return n
 function webdisStore(rawUrl: string): Store {
   const url = new URL(rawUrl);
   const headers: Record<string, string> = {};
-  const user = process.env.WEBDIS_USERNAME ?? decodeURIComponent(url.username);
-  const password = process.env.WEBDIS_PASSWORD ?? decodeURIComponent(url.password);
+  // `||`, not `??`: a blank variable (as in .env.example) must not hide credentials embedded in the URL.
+  const user = process.env.WEBDIS_USERNAME || decodeURIComponent(url.username);
+  const password = process.env.WEBDIS_PASSWORD || decodeURIComponent(url.password);
   if (user) headers.Authorization = `Basic ${Buffer.from(`${user}:${password}`).toString("base64")}`;
   // fetch() rejects URLs with embedded credentials.
   url.username = "";
@@ -193,12 +194,12 @@ const g = globalThis as unknown as { __blobsStore?: Store };
 // Created on first use so configuration errors surface as normal API errors.
 const backend = () => (g.__blobsStore ??= createStore());
 export const store: Store = {
-  get: (code) => backend().get(code),
-  put: (room, expected) => backend().put(room, expected),
-  incr: (counter, ttl) => backend().incr(counter, ttl),
-  version: (code) => backend().version(code),
-  peek: (counter) => backend().peek(counter),
-  ping: (timeoutMs) => backend().ping(timeoutMs),
+  get: async (code) => backend().get(code),
+  put: async (room, expected) => backend().put(room, expected),
+  incr: async (counter, ttl) => backend().incr(counter, ttl),
+  version: async (code) => backend().version(code),
+  peek: async (counter) => backend().peek(counter),
+  ping: async (timeoutMs) => backend().ping(timeoutMs),
 };
 
 export class ConflictError extends Error {}
