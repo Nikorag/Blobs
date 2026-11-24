@@ -10,6 +10,7 @@ import { Logo } from "./Logo";
 import { useCosmetics } from "./CosmeticsProvider";
 import { Sheet } from "./Sheet";
 import { StoreSheet } from "./StoreSheet";
+import { LeaderboardsSheet } from "./LeaderboardsSheet";
 import { SoloSetup } from "./SoloSetup";
 import { clearSolo, useSoloSave, useSoloSaveBroken } from "@/lib/solo/save";
 import { useZonto } from "./ZontoProvider";
@@ -33,6 +34,7 @@ export function Home() {
   const zonto = useZonto();
   const cosmetics = useCosmetics();
   const [showStore, setShowStore] = useState(false);
+  const [showBoards, setShowBoards] = useState(false);
   const { pendingLobby, clearPendingLobby } = zonto;
 
   const ready = identity !== null && name.trim().length > 0;
@@ -168,6 +170,9 @@ export function Home() {
         <Link href="/privacy" className="underline-offset-4 hover:underline">
           Privacy
         </Link>
+        <button onClick={() => setShowBoards(true)} className="underline-offset-4 hover:underline">
+          Leaderboards
+        </button>
         <button onClick={() => setShowStore(true)} className="underline-offset-4 hover:underline">
           Store{cosmetics.status === "ready" && ` · 🪙 ${cosmetics.coins}`}
         </button>
@@ -187,6 +192,8 @@ export function Home() {
           </button>
         )}
       </div>
+
+      <LeaderboardsSheet open={showBoards} onClose={() => setShowBoards(false)} />
 
       <ZontoAchievementsModal client={zonto.client} open={showAchievements} onClose={() => setShowAchievements(false)} />
 
