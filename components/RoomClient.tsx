@@ -7,6 +7,7 @@ import { type Identity, saveIdentity, useIdentity } from "@/lib/client/identity"
 import { useBotDriver } from "@/lib/client/useBotDriver";
 import { useRoom } from "@/lib/client/useRoom";
 import { useZontoAchievements } from "@/lib/zonto/useZontoAchievements";
+import { useZontoLeaderboards } from "@/lib/zonto/useZontoLeaderboards";
 import { useZontoPlay } from "@/lib/zonto/useZontoPlay";
 import { EndScreen } from "./EndScreen";
 import { GameScreen } from "./GameScreen";
@@ -21,6 +22,7 @@ export function RoomClient({ code }: { code: string }) {
   useBotDriver(room);
   useZontoPlay(view?.phase === "Call" || view?.phase === "Play" || view?.phase === "Recap");
   useZontoAchievements(view);
+  useZontoLeaderboards(view);
 
   if (!identity || (status === "loading" && !view)) return <Splash text="Finding your table…" />;
   if (status === "notFound") {

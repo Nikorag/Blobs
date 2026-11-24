@@ -52,9 +52,34 @@ export function clearSolo(): void {
   listeners.forEach((l) => l());
 }
 
-/** The saved CPU game, or null (also during server rendering). */
-export function useSoloSave(): SoloSave | null {
-  const raw = useSyncExternalStore(
+const isObject = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+
+/**
+ * Parse a stored save, or null if it isn't a usable CPU game. The shape is checked well enough
+ * that a damaged or out-of-date save can't crash the screens that read it.
+ */
+export function parseSave(raw: string): SoloSave | null {
+  try {
+    const save = JSON.parse(raw) as unknown;
+    if (!isObject(save) || !isObject(save.config) || !isObject(save.room) || !isObject(save.memory)) return null;
+    const { config, room } = save;
+    if (typeof config.name !== "string" || !Array.isArray(config.bots)) return null;
+    if (typeof room.phase !== "string" || typeof room.hostId !== "string" || typeof room.code !== "string") return null;
+    if (!Array.isArray(room.players) || room.players.length < 2) return null;
+    const seatsOk = room.players.every((p) => isObject(p) && typeof p.id === "string" && typeof p.name === "string" && Array.isArray(p.hand));
+    if (!seatsOk) return null;
+    if (!Array.isArray(room.history) || !Array.isArray(room.trick) || !isObject(room.calls) || !isObject(room.tricks)) return null;
+    for (const n of ["turnIdx", "dealerIdx", "cardsThisRound", "roundNumber", "startingCards"] as const) {
+      if (typeof room[n] !== "number") return null;
+    }
+    return save as unknown as SoloSave;
+  } catch {
+    return null;
+  }
+}
+
+function useRawSave(): string | null {
+  return useSyncExternalStore(
     (cb) => {
       listeners.add(cb);
       return () => listeners.delete(cb);
@@ -62,12 +87,16 @@ export function useSoloSave(): SoloSave | null {
     read,
     () => null,
   );
-  return useMemo(() => {
-    if (!raw) return null;
-    try {
-      return JSON.parse(raw) as SoloSave;
-    } catch {
-      return null;
-    }
-  }, [raw]);
+}
+
+/** The saved CPU game, or null (also during server rendering, or if the save is unusable). */
+export function useSoloSave(): SoloSave | null {
+  const raw = useRawSave();
+  return useMemo(() => (raw ? parseSave(raw) : null), [raw]);
+}
+
+/** True if something is stored under the save key but it can't be used. */
+export function useSoloSaveBroken(): boolean {
+  const raw = useRawSave();
+  return useMemo(() => !!raw && parseSave(raw) === null, [raw]);
 }

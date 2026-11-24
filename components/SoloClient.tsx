@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { useZontoAchievements } from "@/lib/zonto/useZontoAchievements";
+import { useZontoLeaderboards } from "@/lib/zonto/useZontoLeaderboards";
 import { useZontoPlay } from "@/lib/zonto/useZontoPlay";
 import { type SoloSave, useSoloSave } from "@/lib/solo/save";
 import { useSoloGame } from "@/lib/solo/useSoloGame";
@@ -37,6 +38,7 @@ function SoloGame({ save }: { save: SoloSave }) {
   const { view } = room;
   useZontoPlay(view?.phase === "Call" || view?.phase === "Play" || view?.phase === "Recap");
   useZontoAchievements(view);
+  useZontoLeaderboards(view);
   if (!view) return null;
 
   return (

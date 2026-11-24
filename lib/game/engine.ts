@@ -9,6 +9,12 @@ export const MIN_PLAYERS = 2;
 export const MAX_STARTING_CARDS = 7;
 export const RECAP_MS = 8000;
 export const BLOB_SCORE = -1;
+/** How long someone may take over a call or play before another human can have the server move for them. */
+export const TURN_TIMEOUT_MS = 60_000;
+/** The countdown starts showing this long before the deadline. */
+export const TURN_WARN_MS = 15_000;
+/** After this many timeouts in a row the seat is played by the server until its player returns. */
+export const AWAY_AFTER_MISSES = 2;
 const DIFFICULTIES: readonly string[] = ["easy", "normal", "hard"];
 
 export class GameError extends Error {}
@@ -96,6 +102,7 @@ function startRound(room: Room, ctx: Ctx): void {
   room.lastTrick = null;
   room.recapAt = null;
   room.recapReady = [];
+  room.moveAt = ctx.now;
   // The player after the dealer calls first; the dealer calls last.
   room.turnIdx = (room.dealerIdx + 1) % room.players.length;
 }
@@ -195,7 +202,9 @@ export function applyAction(room: Room, playerId: string, action: Action, ctx: C
     }
 
     case "botTurn":
-      return fail("Computer players are driven by the server");
+    case "nudge":
+    case "back":
+      return fail("That is handled by the server");
 
     case "start": {
       if (!isHost) fail("Only the host can start the game");
@@ -221,6 +230,7 @@ export function applyAction(room: Room, playerId: string, action: Action, ctx: C
         fail("The dealer can't make the total equal the number of tricks");
       }
       room.calls[playerId] = value;
+      room.moveAt = ctx.now;
       if (Object.keys(room.calls).length === room.players.length) {
         room.phase = "Play";
         room.turnIdx = (room.dealerIdx + 1) % room.players.length;
@@ -240,6 +250,7 @@ export function applyAction(room: Room, playerId: string, action: Action, ctx: C
         fail("You must follow suit");
       }
       if (room.trick.length === 0) room.lastTrick = null;
+      room.moveAt = ctx.now;
       room.trick.push({ card, playerId });
       player.hand = player.hand.filter((c) => !sameCard(c, card));
 
@@ -284,6 +295,8 @@ export function applyAction(room: Room, playerId: string, action: Action, ctx: C
       room.recapAt = null;
       room.recapReady = [];
       room.emotes = {};
+      room.away = [];
+      room.missed = {};
       return;
     }
 
@@ -296,6 +309,10 @@ export function applyAction(room: Room, playerId: string, action: Action, ctx: C
 export function toView(room: Room, playerId: string, now: number): RoomView {
   const me = room.players.find((p) => p.id === playerId);
   const myHand = me?.hand ?? [];
+  const turnPlayer = room.phase === "Call" || room.phase === "Play" ? room.players[room.turnIdx] : undefined;
+  // Only a human with another human at the table can be skipped: a solo game waits for you.
+  const humans = room.players.filter((p) => !p.bot).length;
+  const timed = !!turnPlayer && !turnPlayer.bot && !room.away?.includes(turnPlayer.id) && humans >= 2;
   const isMyPlay = room.phase === "Play" && room.players[room.turnIdx]?.id === playerId;
   return {
     code: room.code,
@@ -315,6 +332,7 @@ export function toView(room: Room, playerId: string, now: number): RoomView {
       total: totalScore(room, p.id),
       isHost: p.id === room.hostId,
       bot: p.bot,
+      away: !!room.away?.includes(p.id),
       emote: room.emotes?.[p.id] ?? null,
     })),
     myHand,
@@ -326,6 +344,7 @@ export function toView(room: Room, playerId: string, now: number): RoomView {
     dealerId: room.phase === "Lobby" ? null : (room.players[room.dealerIdx]?.id ?? null),
     turnId:
       room.phase === "Call" || room.phase === "Play" ? (room.players[room.turnIdx]?.id ?? null) : null,
+    turnDeadline: timed ? (room.moveAt ?? now) + TURN_TIMEOUT_MS : null,
     trick: room.trick,
     lastTrick: room.lastTrick,
     forbiddenCall: forbiddenCallFor(room, playerId),
