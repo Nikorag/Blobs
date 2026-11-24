@@ -15,6 +15,7 @@ import { SettingsSheet } from "./SettingsSheet";
 import { RecapSheet } from "./RecapSheet";
 import { ScoresSheet } from "./ScoresSheet";
 import { Sheet } from "./Sheet";
+import { TurnTimer, useTurnCountdown } from "./TurnTimer";
 import { SUIT_INFO } from "@/lib/game/cards";
 
 type Room = RoomHandle;
@@ -40,6 +41,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
   const meIdx = view.players.findIndex((p) => p.id === view.you);
   const me = view.players[meIdx];
   const myTurn = view.turnId === view.you;
+  const countdown = useTurnCountdown(view.turnDeadline, room.serverNow);
   const nameOf = (id: string | null) => view.players.find((p) => p.id === id)?.name ?? "Someone";
 
   // Opponents in seating order, starting with whoever sits after me.
@@ -260,6 +262,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
             player={p}
             serverNow={view.serverNow}
             turn={view.turnId === p.id}
+            countdown={view.turnId === p.id ? countdown : null}
             dealer={view.dealerId === p.id}
             phase={view.phase}
             gulp={gulpId === p.id}
@@ -274,6 +277,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
           className={`absolute inset-x-0 top-3 text-center text-sm font-bold ${myTurn ? "text-accent" : "text-white/70"}`}
         >
           {status}
+          {myTurn && countdown !== null && <TurnTimer left={countdown} className="ml-2 align-middle" />}
         </p>
 
         {view.phase === "Call" && myTurn ? (
@@ -426,7 +430,7 @@ function tally(player: { call: number | null; tricks: number }, phase: string) {
   return { text: playing || phase === "Recap" ? `${player.tricks}/${player.call}` : `${player.call}`, cls, glow };
 }
 
-function PlayerChip({ player, serverNow, turn, dealer, phase, gulp, ref }: { player: PublicPlayer; serverNow: number; turn: boolean; dealer: boolean; phase: string; gulp: boolean; ref?: React.Ref<HTMLDivElement> }) {
+function PlayerChip({ player, serverNow, turn, countdown, dealer, phase, gulp, ref }: { player: PublicPlayer; serverNow: number; turn: boolean; countdown: number | null; dealer: boolean; phase: string; gulp: boolean; ref?: React.Ref<HTMLDivElement> }) {
   const t = tally(player, phase);
   return (
     <div
@@ -449,6 +453,10 @@ function PlayerChip({ player, serverNow, turn, dealer, phase, gulp, ref }: { pla
           CPU · {player.bot}
         </span>
       )}
+      {player.away && (
+        <span className="-mt-0.5 rounded-full bg-white/10 px-1.5 text-[0.55rem] font-black uppercase tracking-wider text-muted">Away · CPU</span>
+      )}
+      {countdown !== null && <TurnTimer left={countdown} />}
       <div className="flex items-center gap-1.5">
         <span style={{ "--glow": t.glow } as React.CSSProperties} className={`glow-num rounded-full px-2 py-0.5 text-sm tabular-nums ${t.cls}`}>
           {t.text}
