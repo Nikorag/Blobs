@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { sameCard } from "@/lib/game/cards";
+import { cardName, sameCard } from "@/lib/game/cards";
 import { play as playSound } from "@/lib/client/audio";
 import { vibrate } from "@/lib/client/identity";
 import { useSettings } from "@/lib/client/settings";
@@ -281,7 +281,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
         ) : (
           <div className="flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-4 pt-6">
             {tableCards.length === 0 && view.phase !== "Recap" && (
-              <p className="text-center text-sm text-white/40">
+              <p className="text-center text-sm text-white/80">
                 {view.phase === "Call" ? "Calls are made in turn" : "The table is empty"}
               </p>
             )}
@@ -537,7 +537,7 @@ function Hand({
             onClick={() => onTap(card)}
             disabled={disabled}
             data-pad-default={myTurn && isPlayable ? "" : undefined}
-            aria-label={`${card.rank} of ${card.suit}${isSelected ? ", selected. Tap again to play" : ""}`}
+            aria-label={`${cardName(card)}${isSelected ? ", selected. Tap again to play" : isPlayable && myTurn ? ", playable" : ""}`}
             style={{ marginLeft: i === 0 ? 0 : gap, zIndex: i }}
             className={`relative shrink-0 rounded-xl transition-all duration-200 ${isSelected ? "-translate-y-5" : myTurn && isPlayable ? "-translate-y-2" : ""} ${dim ? "brightness-[.55] saturate-50" : ""}`}
           >

@@ -161,7 +161,7 @@ function BoardGame({ view }: { view: RoomView }) {
           ) : (
             <div className="flex w-full flex-wrap items-center justify-center gap-x-6 gap-y-8 pt-12">
               {tableCards.length === 0 && (
-                <p className="text-2xl text-white/40">{view.phase === "Call" ? "Calls are made in turn" : "The table is empty"}</p>
+                <p className="text-2xl text-white/80">{view.phase === "Call" ? "Calls are made in turn" : "The table is empty"}</p>
               )}
               {tableCards.map((pc) => {
                 const winner = winnerId === pc.playerId;
