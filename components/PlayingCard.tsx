@@ -1,6 +1,6 @@
 "use client";
 
-import { rankLabel, SUIT_INFO } from "@/lib/game/cards";
+import { cardName, rankLabel, SUIT_INFO } from "@/lib/game/cards";
 import type { CardStyle } from "@/lib/game/look";
 import type { Card, Suit } from "@/lib/game/types";
 import { useCosmetics } from "./CosmeticsProvider";
@@ -88,7 +88,7 @@ export function PlayingCard({ card, size = "md", className = "", style, minimal 
   return (
     <div
       role="img"
-      aria-label={`${rankLabel(card.rank)} of ${suit.name}`}
+      aria-label={cardName(card)}
       style={{ ...style, color: SUIT_COLOR[card.suit] }}
       className={`relative shrink-0 select-none bg-gradient-to-b ${look.face} shadow-[inset_0_2px_0_rgb(255_255_255/0.9),0_6px_0_-1px_rgb(120_90_40/0.35),0_10px_16px_-4px_rgb(0_0_0/0.55)] ${s.box} ${className}`}
     >

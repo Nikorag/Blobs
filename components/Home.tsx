@@ -135,7 +135,7 @@ export function Home() {
             autoCorrect="off"
             spellCheck={false}
             aria-label="Room code"
-            className="h-13 min-w-0 flex-1 rounded-2xl border border-line bg-black/25 px-4 text-center text-xl font-black uppercase tracking-[0.4em] outline-none placeholder:text-white/20 focus:border-accent"
+            className="h-13 min-w-0 flex-1 rounded-2xl border border-line bg-black/25 px-4 text-center text-xl font-black uppercase tracking-[0.4em] outline-none placeholder:text-white/50 focus:border-accent"
           />
           <button type="submit" className="btn btn-ghost !min-h-13" disabled={!ready || code.length !== 4 || busy !== null}>
             {busy === "join" ? "…" : "Join"}

@@ -18,6 +18,13 @@ export function rankLabel(rank: number): string {
   return RANK_LABEL[rank] ?? String(rank);
 }
 
+const RANK_NAME: Record<number, string> = { 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven", 8: "Eight", 9: "Nine", 10: "Ten", 11: "Jack", 12: "Queen", 13: "King", 14: "Ace" };
+
+/** A card as it should be spoken: "Ace of hearts". */
+export function cardName(card: { rank: number; suit: Suit }): string {
+  return `${RANK_NAME[card.rank] ?? card.rank} of ${SUIT_INFO[card.suit].name.toLowerCase()}`;
+}
+
 export function cardKey(card: Card): string {
   return `${card.rank}${card.suit}`;
 }
