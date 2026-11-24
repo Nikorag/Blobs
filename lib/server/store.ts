@@ -2,11 +2,15 @@ import type { Room } from "@/lib/game/types";
 
 const TTL_SECONDS = 60 * 60 * 24;
 const key = (code: string) => `blobs:room:${code}`;
+/** The room's current version on its own tiny key, so a poll that finds nothing new needn't download the room. */
+const versionKey = (code: string) => `blobs:ver:${code}`;
 
 interface Store {
   get(code: string): Promise<Room | null>;
   /** Write `room` only if the stored version still equals `expectedVersion` (0 = must not exist). */
   put(room: Room, expectedVersion: number): Promise<boolean>;
+  /** The stored room's version without reading the room, or null if unknown (missing, expired or written before this key existed). */
+  version(code: string): Promise<number | null>;
   /** Add one to a counter that expires `ttlSeconds` after its first increment; returns the new count. */
   incr(counter: string, ttlSeconds: number): Promise<number>;
   /** Current value of a counter (0 if unset or expired). */
@@ -23,6 +27,7 @@ elseif tonumber(ARGV[1]) ~= 0 then
   return 0
 end
 redis.call('SET', KEYS[1], ARGV[2], 'EX', ARGV[3])
+redis.call('SET', KEYS[2], ARGV[4], 'EX', ARGV[3])
 return 1
 `;
 
@@ -105,8 +110,12 @@ function webdisStore(rawUrl: string): Store {
       return typeof raw === "string" ? (JSON.parse(raw) as Room) : null;
     },
     async put(room, expectedVersion) {
-      const ok = await command(null, "EVAL", CAS_SCRIPT, 1, key(room.code), expectedVersion, JSON.stringify(room), TTL_SECONDS);
+      const ok = await command(null, "EVAL", CAS_SCRIPT, 2, key(room.code), versionKey(room.code), expectedVersion, JSON.stringify(room), TTL_SECONDS, room.version);
       return ok === 1;
+    },
+    async version(code) {
+      const raw = await command(null, "GET", versionKey(code));
+      return typeof raw === "string" ? Number(raw) : null;
     },
     async incr(counter, ttlSeconds) {
       return Number(await command(null, "EVAL", INCR_SCRIPT, 1, `blobs:rl:${counter}`, ttlSeconds));
@@ -132,6 +141,10 @@ function memoryStore(): Store {
     return counters.get(counter);
   };
   return {
+    async version(code) {
+      const hit = rooms.get(code);
+      return hit && hit.exp >= Date.now() ? (JSON.parse(hit.json) as Room).version : null;
+    },
     async incr(counter, ttlSeconds) {
       const hit = live(counter) ?? { n: 0, exp: Date.now() + ttlSeconds * 1000 };
       hit.n += 1;
@@ -183,6 +196,7 @@ export const store: Store = {
   get: (code) => backend().get(code),
   put: (room, expected) => backend().put(room, expected),
   incr: (counter, ttl) => backend().incr(counter, ttl),
+  version: (code) => backend().version(code),
   peek: (counter) => backend().peek(counter),
   ping: (timeoutMs) => backend().ping(timeoutMs),
 };
