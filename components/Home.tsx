@@ -165,6 +165,9 @@ export function Home() {
         <Link href="/board" className="underline-offset-4 hover:underline">
           Open the Board
         </Link>
+        <Link href="/privacy" className="underline-offset-4 hover:underline">
+          Privacy
+        </Link>
         <button onClick={() => setShowStore(true)} className="underline-offset-4 hover:underline">
           Store{cosmetics.status === "ready" && ` · 🪙 ${cosmetics.coins}`}
         </button>
