@@ -1,17 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { sameCard } from "@/lib/game/cards";
+import { cardName, sameCard } from "@/lib/game/cards";
+import { play as playSound } from "@/lib/client/audio";
 import { vibrate } from "@/lib/client/identity";
+import { useSettings } from "@/lib/client/settings";
 import type { RoomHandle } from "@/lib/client/roomHandle";
 import type { Card, PlayedCard, PublicPlayer, RoomView } from "@/lib/game/types";
 import { Avatar } from "./Avatar";
 import { useCosmetics } from "./CosmeticsProvider";
 import { EmoteBubble, EmotePicker } from "./Emote";
 import { cardStyleOf, cardTilt, PlayingCard } from "./PlayingCard";
+import { SettingsSheet } from "./SettingsSheet";
 import { RecapSheet } from "./RecapSheet";
 import { ScoresSheet } from "./ScoresSheet";
 import { Sheet } from "./Sheet";
+import { TurnTimer, useTurnCountdown } from "./TurnTimer";
 import { SUIT_INFO } from "@/lib/game/cards";
 
 type Room = RoomHandle;
@@ -22,8 +26,10 @@ const TRUMP_FLY_MS = 600;
 
 export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
   const cosmetics = useCosmetics();
+  const settings = useSettings();
   const [scoresOpen, setScoresOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [tapped, setTapped] = useState<Card | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
   // Trick resolution: hold the finished trick on the table with a winner call-out, then sweep it to the winner.
@@ -35,6 +41,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
   const meIdx = view.players.findIndex((p) => p.id === view.you);
   const me = view.players[meIdx];
   const myTurn = view.turnId === view.you;
+  const countdown = useTurnCountdown(view.turnDeadline, room.serverNow);
   const nameOf = (id: string | null) => view.players.find((p) => p.id === id)?.name ?? "Someone";
 
   // Opponents in seating order, starting with whoever sits after me.
@@ -48,6 +55,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
   useEffect(() => {
     if (myTurn && !wasMyTurn.current) {
       vibrate([180, 60, 180]);
+      playSound("yourTurn");
       setBanner(view.phase === "Call" ? "Your call!" : "Your turn!");
       const t = setTimeout(() => setBanner(null), 2600);
       wasMyTurn.current = true;
@@ -55,6 +63,14 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
     }
     if (!myTurn) wasMyTurn.current = false;
   }, [myTurn, view.phase]);
+
+  // A click for every card that lands on the table, whoever played it.
+  const tableCount = view.trick.length;
+  const seenCount = useRef(tableCount);
+  useEffect(() => {
+    if (tableCount > seenCount.current) playSound("cardPlay");
+    seenCount.current = tableCount;
+  }, [tableCount]);
 
   useEffect(() => {
     if (!myTurn) {
@@ -88,6 +104,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
       setSweepTo(next);
       setStage("sweep");
       vibrate(winnerId === view.you ? [30, 40, 30] : 12);
+      playSound(winnerId === view.you ? "trickWin" : "trickLost");
     }, 1600);
     const t2 = setTimeout(() => setStage("done"), 1600 + 550);
     return () => {
@@ -149,7 +166,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
     () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     () => false,
   );
-  const revealing = revealKey !== null && revealed !== revealKey && !reducedMotion && revealKey !== skipKey;
+  const revealing = revealKey !== null && revealed !== revealKey && !reducedMotion && !settings.reducedMotion && revealKey !== skipKey;
 
   useEffect(() => {
     if (!revealing) return;
@@ -245,6 +262,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
             player={p}
             serverNow={view.serverNow}
             turn={view.turnId === p.id}
+            countdown={view.turnId === p.id ? countdown : null}
             dealer={view.dealerId === p.id}
             phase={view.phase}
             gulp={gulpId === p.id}
@@ -259,6 +277,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
           className={`absolute inset-x-0 top-3 text-center text-sm font-bold ${myTurn ? "text-accent" : "text-white/70"}`}
         >
           {status}
+          {myTurn && countdown !== null && <TurnTimer left={countdown} className="ml-2 align-middle" />}
         </p>
 
         {view.phase === "Call" && myTurn ? (
@@ -266,7 +285,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
         ) : (
           <div className="flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-4 pt-6">
             {tableCards.length === 0 && view.phase !== "Recap" && (
-              <p className="text-center text-sm text-white/40">
+              <p className="text-center text-sm text-white/80">
                 {view.phase === "Call" ? "Calls are made in turn" : "The table is empty"}
               </p>
             )}
@@ -343,6 +362,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
       </section>
 
       <RecapSheet room={room} view={view} />
+      <SettingsSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <ScoresSheet open={scoresOpen} onClose={() => setScoresOpen(false)} view={view} />
       <Sheet open={menuOpen} title="Game" onClose={() => setMenuOpen(false)}>
         <div className="space-y-3 pb-2">
@@ -351,6 +371,15 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
               Game code <b className="tracking-[0.3em] text-ink">{view.code}</b>
             </p>
           )}
+          <button
+            className="btn btn-ghost w-full"
+            onClick={() => {
+              setMenuOpen(false);
+              setSettingsOpen(true);
+            }}
+          >
+            Settings
+          </button>
           {room.solo ? (
             <button
               className="btn btn-danger w-full"
@@ -401,7 +430,7 @@ function tally(player: { call: number | null; tricks: number }, phase: string) {
   return { text: playing || phase === "Recap" ? `${player.tricks}/${player.call}` : `${player.call}`, cls, glow };
 }
 
-function PlayerChip({ player, serverNow, turn, dealer, phase, gulp, ref }: { player: PublicPlayer; serverNow: number; turn: boolean; dealer: boolean; phase: string; gulp: boolean; ref?: React.Ref<HTMLDivElement> }) {
+function PlayerChip({ player, serverNow, turn, countdown, dealer, phase, gulp, ref }: { player: PublicPlayer; serverNow: number; turn: boolean; countdown: number | null; dealer: boolean; phase: string; gulp: boolean; ref?: React.Ref<HTMLDivElement> }) {
   const t = tally(player, phase);
   return (
     <div
@@ -424,6 +453,10 @@ function PlayerChip({ player, serverNow, turn, dealer, phase, gulp, ref }: { pla
           CPU · {player.bot}
         </span>
       )}
+      {player.away && (
+        <span className="-mt-0.5 rounded-full bg-white/10 px-1.5 text-[0.55rem] font-black uppercase tracking-wider text-muted">Away · CPU</span>
+      )}
+      {countdown !== null && <TurnTimer left={countdown} />}
       <div className="flex items-center gap-1.5">
         <span style={{ "--glow": t.glow } as React.CSSProperties} className={`glow-num rounded-full px-2 py-0.5 text-sm tabular-nums ${t.cls}`}>
           {t.text}
@@ -494,10 +527,11 @@ function Hand({
 }) {
   const n = cards.length;
   // Gap between cards: 0.5rem when there's room, otherwise a negative margin so the whole hand fits the width.
-  const gap = n > 1 ? `min(0.5rem, calc((100cqw - 2rem - 3.75rem * ${n}) / ${n - 1}))` : "0px";
+  const large = useSettings().largeCards;
+  const gap = n > 1 ? `min(0.5rem, calc((100cqw - 2rem - ${large ? "4.5rem" : "3.75rem"} * ${n}) / ${n - 1}))` : "0px";
   return (
     <div
-      className="no-scrollbar flex min-h-[8.25rem] items-end justify-center overflow-x-auto px-4 pb-1 pt-4 lg:min-h-[9.75rem]"
+      className={`no-scrollbar flex ${large ? "min-h-[9.5rem] lg:min-h-[10.5rem]" : "min-h-[8.25rem] lg:min-h-[9.75rem]"} items-end justify-center overflow-x-auto px-4 pb-1 pt-4`}
       style={{ containerType: "inline-size" }}
       aria-label="Your hand"
     >
@@ -511,11 +545,11 @@ function Hand({
             onClick={() => onTap(card)}
             disabled={disabled}
             data-pad-default={myTurn && isPlayable ? "" : undefined}
-            aria-label={`${card.rank} of ${card.suit}${isSelected ? ", selected. Tap again to play" : ""}`}
+            aria-label={`${cardName(card)}${isSelected ? ", selected. Tap again to play" : isPlayable && myTurn ? ", playable" : ""}`}
             style={{ marginLeft: i === 0 ? 0 : gap, zIndex: i }}
             className={`relative shrink-0 rounded-xl transition-all duration-200 ${isSelected ? "-translate-y-5" : myTurn && isPlayable ? "-translate-y-2" : ""} ${dim ? "brightness-[.55] saturate-50" : ""}`}
           >
-            <PlayingCard card={card} size="md" className={`lg:[zoom:1.3] ${isSelected ? "ring-4 ring-accent" : ""}`} />
+            <PlayingCard card={card} size={large ? "lg" : "md"} className={`${large ? "" : "lg:[zoom:1.3]"} ${isSelected ? "ring-4 ring-accent" : ""}`} />
           </button>
         );
       })}

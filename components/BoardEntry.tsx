@@ -33,7 +33,7 @@ export function BoardEntry() {
           autoCorrect="off"
           spellCheck={false}
           aria-label="Game code"
-          className="h-13 w-full rounded-2xl border border-line bg-black/25 px-4 text-center text-xl font-black uppercase tracking-[0.4em] outline-none placeholder:text-white/20 focus:border-accent"
+          className="h-13 w-full rounded-2xl border border-line bg-black/25 px-4 text-center text-xl font-black uppercase tracking-[0.4em] outline-none placeholder:text-white/50 focus:border-accent"
         />
         <button type="submit" className="btn btn-primary w-full" disabled={code.length !== 4}>
           Open the Board

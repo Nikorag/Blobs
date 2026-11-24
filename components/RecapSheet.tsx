@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { play } from "@/lib/client/audio";
 import { RECAP_MS, scoreFor } from "@/lib/game/engine";
 import type { RoomHandle } from "@/lib/client/roomHandle";
 import type { RoomView } from "@/lib/game/types";
@@ -16,6 +17,13 @@ export function RecapSheet({ room, view }: { room: Room; view: RoomView }) {
   const [now, setNow] = useState(serverNow);
   const iAmReady = view.recapReady.includes(view.you);
   const recapAt = view.recapAt;
+
+  // A sting for how you did this round: spot on, or blobbed.
+  const roundNo = view.history.length;
+  const myScore = result ? scoreFor(result, view.you) : null;
+  useEffect(() => {
+    if (open && myScore !== null) play(myScore < 0 ? "blob" : "spotOn");
+  }, [open, roundNo, myScore]);
 
   // Count down on the server's clock, then ask for the next round (the server ignores duplicates).
   useEffect(() => {
