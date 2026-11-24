@@ -180,7 +180,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
   }, [revealKey]);
 
   return (
-    <main className="mx-auto flex h-dvh w-full max-w-md flex-col overflow-hidden">
+    <main className="mx-auto flex h-dvh w-full max-w-md flex-col overflow-hidden lg:grid lg:max-w-[92vw] lg:grid-cols-[19rem_minmax(0,1fr)] lg:grid-rows-[auto_minmax(0,1fr)_auto] lg:gap-x-6">
       {banner && (
         <div className="anim-banner pointer-events-none fixed inset-x-0 top-0 z-30 flex justify-center px-4 safe-top">
           <div className="rounded-full bg-accent px-5 py-2 text-sm font-black text-accent-ink shadow-xl">{banner}</div>
@@ -210,7 +210,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
       )}
 
       {/* Header */}
-      <header className="safe-top flex items-center gap-3 px-4 pb-2">
+      <header className="safe-top flex items-center gap-3 px-4 pb-2 lg:col-span-2">
         <button onClick={() => setMenuOpen(true)} aria-label="Menu" className="grid size-10 place-items-center rounded-full bg-surface2 text-lg">
           ☰
         </button>
@@ -236,7 +236,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
       </header>
 
       {/* Opponents */}
-      <section className="no-scrollbar flex gap-2 overflow-x-auto px-4 pb-4" aria-label="Players">
+      <section className="no-scrollbar flex gap-2 overflow-x-auto px-4 pb-4 lg:col-start-1 lg:row-span-2 lg:row-start-2 lg:flex-col lg:overflow-x-visible lg:overflow-y-auto lg:px-0 lg:[&>*]:flex-none" aria-label="Players">
         {opponents.map(({ p }) => (
           <PlayerChip
             key={p.id}
@@ -256,7 +256,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
       </section>
 
       {/* Table */}
-      <section className="felt relative z-20 mx-4 flex min-h-0 flex-1 flex-col items-center justify-center rounded-[2.5rem] px-3">
+      <section className="felt relative z-20 mx-4 flex min-h-0 flex-1 flex-col items-center justify-center rounded-[2.5rem] px-3 lg:col-start-2 lg:row-start-2 lg:mx-2">
         <p
           aria-live="polite"
           className={`absolute inset-x-0 top-3 text-center text-sm font-bold ${myTurn ? "text-accent" : "text-white/70"}`}
@@ -292,7 +292,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
                     card={pc.card}
                     styleId={cardStyleOf(view, pc.playerId, cosmetics.cards)}
                     size={tableCards.length > 5 ? "md" : "lg"}
-                    className={`anim-card-in ${winner ? "ring-4 ring-accent" : ""}`}
+                    className={`anim-card-in lg:[zoom:1.4] ${winner ? "ring-4 ring-accent" : ""}`}
                     style={cardTilt(pc.card)}
                   />
                   <span className={`max-w-16 truncate text-xs font-bold ${winner ? "text-accent" : "text-white/80"}`}>
@@ -317,7 +317,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
       </section>
 
       {/* My status + hand */}
-      <section className="safe-bottom pt-3">
+      <section className="safe-bottom pt-3 lg:col-start-2 lg:row-start-3">
         <div className="mb-2 flex items-center justify-between px-5">
           <div
             ref={(el) => {
@@ -505,7 +505,7 @@ function Hand({
   const gap = n > 1 ? `min(0.5rem, calc((100cqw - 2rem - 3.75rem * ${n}) / ${n - 1}))` : "0px";
   return (
     <div
-      className="no-scrollbar flex min-h-[8.25rem] items-end justify-center overflow-x-auto px-4 pb-1 pt-4"
+      className="no-scrollbar flex min-h-[8.25rem] items-end justify-center overflow-x-auto px-4 pb-1 pt-4 lg:min-h-[9.75rem]"
       style={{ containerType: "inline-size" }}
       aria-label="Your hand"
     >
@@ -523,7 +523,7 @@ function Hand({
             style={{ marginLeft: i === 0 ? 0 : gap, zIndex: i }}
             className={`relative shrink-0 rounded-xl transition-all duration-200 ${isSelected ? "-translate-y-5" : myTurn && isPlayable ? "-translate-y-2" : ""} ${dim ? "brightness-[.55] saturate-50" : ""}`}
           >
-            <PlayingCard card={card} size="md" className={isSelected ? "ring-4 ring-accent" : ""} />
+            <PlayingCard card={card} size="md" className={`lg:[zoom:1.3] ${isSelected ? "ring-4 ring-accent" : ""}`} />
           </button>
         );
       })}
