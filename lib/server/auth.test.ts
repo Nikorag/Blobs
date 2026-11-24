@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { POST as createRoom } from "@/app/api/rooms/route";
 import { POST as act } from "@/app/api/rooms/[code]/action/route";
 import { POST as join } from "@/app/api/rooms/[code]/join/route";
@@ -60,5 +60,22 @@ describe("seat authentication", () => {
     const kick = { action: { type: "kick", playerId: publicIdFor(HOST) } };
     expect((await act(post(`/api/rooms/${code}/action`, GUEST, kick), ctx(code))).status).toBe(400);
     expect((await act(post(`/api/rooms/${code}/action`, HOST, { action: { type: "ready" } }), ctx(code))).status).toBe(200);
+  });
+});
+
+describe("polling", () => {
+  it("answers an unchanged poll without reading the room, and sends a view when it changed", async () => {
+    const code = await table();
+    const first = await (await get(code, HOST)).json();
+    const v = first.view.version;
+    const { store } = await import("./store");
+    const spy = vi.spyOn(store, "get");
+    const same = await (await get(code, HOST, `?v=${v}`)).json();
+    expect(same.unchanged).toBe(true);
+    expect(spy).not.toHaveBeenCalled();
+    await act(post(`/api/rooms/${code}/action`, GUEST, { action: { type: "ready", ready: true } }), ctx(code));
+    const changed = await (await get(code, HOST, `?v=${v}`)).json();
+    expect(changed.view.version).toBeGreaterThan(v);
+    spy.mockRestore();
   });
 });

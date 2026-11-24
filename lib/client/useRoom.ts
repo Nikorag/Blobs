@@ -8,6 +8,26 @@ export type RoomStatus = "loading" | "ready" | "needsJoin" | "notFound" | "offli
 
 const POLL_VISIBLE_MS = 1200;
 const POLL_HIDDEN_MS = 5000;
+/** Mid-game and waiting on someone else: nothing for you to do, so look a little less often. */
+const POLL_WAITING_MS = 3000;
+/** You are next after whoever is playing now: a bit quicker so your turn arrives promptly. */
+const POLL_UP_NEXT_MS = 1800;
+/** The game is over. Still watch (the host can start a new one) but gently. */
+const POLL_ENDED_MS = 5000;
+
+/** How long to wait before the next poll, given what this player can see. Exported for tests. */
+export function pollDelay(view: RoomView | null, hidden: boolean, board: boolean): number {
+  if (hidden) return POLL_HIDDEN_MS;
+  if (!view) return POLL_VISIBLE_MS;
+  if (view.phase === "End") return POLL_ENDED_MS;
+  if (board) return POLL_VISIBLE_MS; // the Board is a shared screen: keep it lively
+  if (view.phase !== "Call" && view.phase !== "Play") return POLL_VISIBLE_MS;
+  if (view.turnId === view.you) return POLL_VISIBLE_MS;
+  // The player due to go after the current one polls a bit faster so their turn arrives promptly.
+  const turn = view.players.findIndex((p) => p.id === view.turnId);
+  const next = view.players[(turn + 1) % view.players.length];
+  return next?.id === view.you ? POLL_UP_NEXT_MS : POLL_WAITING_MS;
+}
 
 /**
  * Keeps a RoomView fresh by polling (Vercel functions can't hold sockets open) and
@@ -21,12 +41,14 @@ export function useRoom(code: string, playerId: string | null, board = false) {
   const [busy, setBusy] = useState(false);
   const versionRef = useRef(-1);
   const offsetRef = useRef(0);
+  const viewRef = useRef<RoomView | null>(null);
   const wakeRef = useRef<() => void>(() => {});
 
   const accept = useCallback((next: RoomView) => {
     offsetRef.current = next.serverNow - Date.now();
     if (next.version >= versionRef.current) {
       versionRef.current = next.version;
+      viewRef.current = next;
       setView(next);
     }
     setStatus("ready");
@@ -39,13 +61,14 @@ export function useRoom(code: string, playerId: string | null, board = false) {
     let timer: ReturnType<typeof setTimeout> | undefined;
 
     const tick = async () => {
-      let delay = document.hidden ? POLL_HIDDEN_MS : POLL_VISIBLE_MS;
+      let delay = pollDelay(viewRef.current, document.hidden, board);
       try {
         const res = await pollRoom(code, board ? null : playerId, versionRef.current);
         if (cancelled) return;
         if (res.view) accept(res.view);
         else if (res.now) offsetRef.current = res.now - Date.now();
         setStatus("ready");
+        delay = pollDelay(viewRef.current, document.hidden, board);
       } catch (err) {
         if (cancelled) return;
         if (err instanceof ApiError && err.status === 404) {
