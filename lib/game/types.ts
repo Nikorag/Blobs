@@ -68,6 +68,10 @@ export interface Room {
   recapReady: string[];
   /** ms epoch of the last call, play or deal. The server paces computer players from it. */
   moveAt?: number;
+  /** Seats the server is playing because their player stopped responding. They can take them back. */
+  away?: string[];
+  /** Consecutive turns each human let run out. */
+  missed?: Record<string, number>;
   /** Each player's latest emote (absent on rooms created before emotes existed). */
   emotes?: Record<string, { emote: EmoteId; at: number }>;
   /** What the computer players remember of the round (public information only). Never sent to clients. */
@@ -86,6 +90,8 @@ export interface PublicPlayer {
   total: number;
   isHost: boolean;
   bot?: Difficulty;
+  /** A human whose seat the server is playing until they come back. */
+  away: boolean;
   /** Their latest emote; the client decides whether it is still fresh. */
   emote: { emote: EmoteId; at: number } | null;
 }
@@ -107,6 +113,8 @@ export interface RoomView {
   roundNumber: number;
   dealerId: string | null;
   turnId: string | null;
+  /** ms epoch (server clock) after which another human may skip the current player's turn, or null. */
+  turnDeadline: number | null;
   trick: PlayedCard[];
   lastTrick: LastTrick | null;
   /** The one call the dealer is not allowed to make (or null). */
@@ -124,6 +132,10 @@ export type Action =
   | { type: "addBot"; level: Difficulty }
   /** Host only: have the computer player whose turn it is take it. Handled by the server, not the engine. */
   | { type: "botTurn" }
+  /** Any human: play for whoever has run out the turn clock. Handled by the server, not the engine. */
+  | { type: "nudge" }
+  /** Take your seat back after being away. Handled by the server, not the engine. */
+  | { type: "back" }
   | { type: "kick"; targetId: string }
   | { type: "start" }
   | { type: "call"; value: number }

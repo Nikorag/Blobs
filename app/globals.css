@@ -326,6 +326,15 @@ button,
   }
 }
 
+/* The same, when the player turns it on in Settings on a device that doesn't ask for it. */
+html[data-reduce-motion="true"] *,
+html[data-reduce-motion="true"] *::before,
+html[data-reduce-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
 @keyframes splash-cover-bail {
   to {
     visibility: hidden;

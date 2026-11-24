@@ -5,7 +5,7 @@ import { isOwned } from "./catalog";
 import { award, buy, emptyWallet, gameFingerprint, gameReward, parseWallet } from "./wallet";
 
 function endView(code: string, me: number, other: number): RoomView {
-  const player = (id: string, total: number) => ({ id, name: id, ready: true, look: defaultLook(0), handCount: 0, call: null, tricks: 0, total, isHost: false });
+  const player = (id: string, total: number) => ({ id, name: id, ready: true, look: defaultLook(0), handCount: 0, call: null, tricks: 0, total, isHost: false, away: false });
   return {
     code,
     phase: "End",
