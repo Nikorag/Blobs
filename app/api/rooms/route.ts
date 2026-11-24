@@ -6,7 +6,7 @@ import { randomCode, store } from "@/lib/server/store";
 export async function POST(request: Request) {
   try {
     const body = await readJson(request);
-    const playerId = playerIdFrom(body.playerId);
+    const playerId = playerIdFrom(request);
     const name = typeof body.name === "string" ? body.name : "";
     for (let attempt = 0; attempt < 10; attempt++) {
       const room = createRoom(randomCode(), playerId, name, Date.now());

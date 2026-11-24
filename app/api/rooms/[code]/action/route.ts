@@ -1,6 +1,6 @@
 import { applyAction, GameError, toView } from "@/lib/game/engine";
 import type { Action } from "@/lib/game/types";
-import { errorResponse, notFound, playerIdFrom, readJson } from "@/lib/server/http";
+import { errorResponse, ForbiddenError, notFound, playerIdFrom, readJson } from "@/lib/server/http";
 import { playBotTurn, syncBotMemory } from "@/lib/server/bots";
 import { mutateRoom, normaliseCode } from "@/lib/server/store";
 
@@ -10,12 +10,13 @@ export async function POST(request: Request, ctx: RouteContext<"/api/rooms/[code
   try {
     const { code } = await ctx.params;
     const body = await readJson(request);
-    const playerId = playerIdFrom(body.playerId);
+    const playerId = playerIdFrom(request);
     const action = body.action as Action | undefined;
     if (!action || !ACTION_TYPES.includes(action.type)) throw new GameError("Unknown action");
 
     const now = Date.now();
     const outcome = await mutateRoom(normaliseCode(code), (room) => {
+      if (!room.players.some((p) => p.id === playerId)) throw new ForbiddenError("You are not in this room");
       if (action.type === "botTurn") return playBotTurn(room, playerId, now);
       applyAction(room, playerId, action, { now, rng: Math.random });
       syncBotMemory(room);
