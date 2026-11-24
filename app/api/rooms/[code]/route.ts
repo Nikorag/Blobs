@@ -19,7 +19,15 @@ export async function GET(request: Request, ctx: RouteContext<"/api/rooms/[code]
     const playerId = board ? "" : playerIdFrom(request);
     const seen = Number(url.searchParams.get("v") ?? -1);
 
-    const room = await store.get(normaliseCode(code));
+    const roomCode = normaliseCode(code);
+    const headers = { "Cache-Control": "no-store" };
+    // Most polls find nothing new. Answer those from the tiny version key without downloading the
+    // room. It only says "nothing changed since the version you already hold", so it leaks nothing.
+    if (seen >= 0 && (await store.version(roomCode)) === seen) {
+      return Response.json({ unchanged: true, now: Date.now() }, { headers });
+    }
+
+    const room = await store.get(roomCode);
     if (!room) {
       await recordMiss(request);
       return notFound();
@@ -27,7 +35,6 @@ export async function GET(request: Request, ctx: RouteContext<"/api/rooms/[code]
     if (!board && !room.players.some((p) => p.id === playerId)) {
       throw new ForbiddenError("You are not in this room");
     }
-    const headers = { "Cache-Control": "no-store" };
     if (room.version === seen) return Response.json({ unchanged: true, now: Date.now() }, { headers });
     return Response.json({ view: toView(room, playerId, Date.now()) }, { headers });
   } catch (err) {

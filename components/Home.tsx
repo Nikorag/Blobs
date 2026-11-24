@@ -10,6 +10,7 @@ import { Logo } from "./Logo";
 import { useCosmetics } from "./CosmeticsProvider";
 import { Sheet } from "./Sheet";
 import { StoreSheet } from "./StoreSheet";
+import { SettingsSheet } from "./SettingsSheet";
 import { SoloSetup } from "./SoloSetup";
 import { clearSolo, useSoloSave, useSoloSaveBroken } from "@/lib/solo/save";
 import { useZonto } from "./ZontoProvider";
@@ -24,6 +25,7 @@ export function Home() {
   const [error, setError] = useState<string | null>(null);
   const [showRules, setShowRules] = useState(false);
   const [showSolo, setShowSolo] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const soloSave = useSoloSave();
   const soloBroken = useSoloSaveBroken();
 
@@ -135,7 +137,7 @@ export function Home() {
             autoCorrect="off"
             spellCheck={false}
             aria-label="Room code"
-            className="h-13 min-w-0 flex-1 rounded-2xl border border-line bg-black/25 px-4 text-center text-xl font-black uppercase tracking-[0.4em] outline-none placeholder:text-white/20 focus:border-accent"
+            className="h-13 min-w-0 flex-1 rounded-2xl border border-line bg-black/25 px-4 text-center text-xl font-black uppercase tracking-[0.4em] outline-none placeholder:text-white/50 focus:border-accent"
           />
           <button type="submit" className="btn btn-ghost !min-h-13" disabled={!ready || code.length !== 4 || busy !== null}>
             {busy === "join" ? "…" : "Join"}
@@ -165,6 +167,9 @@ export function Home() {
         <Link href="/board" className="underline-offset-4 hover:underline">
           Open the Board
         </Link>
+        <button onClick={() => setShowSettings(true)} className="underline-offset-4 hover:underline">
+          Settings
+        </button>
         <Link href="/privacy" className="underline-offset-4 hover:underline">
           Privacy
         </Link>
@@ -194,6 +199,8 @@ export function Home() {
 
       {showSolo && <SoloSetup open onClose={() => setShowSolo(false)} playerName={name.trim()} />}
 
+      <SettingsSheet open={showSettings} onClose={() => setShowSettings(false)} />
+
       <Sheet open={showRules} title="How to play" onClose={() => setShowRules(false)}>
         <Rules />
       </Sheet>
@@ -209,6 +216,7 @@ export function Rules() {
         ["Call", "Before play, everyone says how many tricks they'll win. The dealer calls last and can't make the total equal the number of tricks, so someone is always wrong."],
         ["Play", "The player after the dealer leads. You must follow suit if you can. Highest card of the led suit wins, but any trump beats it. Winner leads next."],
         ["Score", "Hit your call exactly and you score that number. Miss — over or under — and you're blobbed for −1."],
+        ["Taking too long?", "In an online game you have 60 seconds per turn. A countdown shows for the last 15, then the table can play a sensible move for you. Miss two turns in a row and the game plays your seat until you tap back in; the next time you play, it's yours again."],
       ].map(([title, body], i) => (
         <li key={title} className="flex gap-3">
           <span className="grid size-7 shrink-0 place-items-center rounded-full bg-accent text-sm font-black text-accent-ink">{i + 1}</span>

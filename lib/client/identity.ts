@@ -1,5 +1,6 @@
 import { useMemo, useSyncExternalStore } from "react";
 import { randomName } from "@/lib/game/names";
+import { getSettings } from "./settings";
 
 const KEY = "blobs:player";
 
@@ -54,6 +55,7 @@ export function useIdentity(): Identity | null {
 }
 
 export function vibrate(pattern: number | number[]): void {
+  if (!getSettings().haptics) return;
   try {
     navigator.vibrate?.(pattern);
   } catch {

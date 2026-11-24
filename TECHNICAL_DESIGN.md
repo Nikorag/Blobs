@@ -48,3 +48,25 @@ Online rooms live in Redis, reached over HTTPS through [Webdis](https://webd.is)
 - `503 {"ok":false,"error":"..."}`: storage is unreachable, rejecting credentials, or `WEBDIS_URL` is missing. The body never contains URLs, usernames, tokens or header values; details go to the function log.
 
 Point an uptime monitor at `/api/health` in production **as well as** the home page, so "site up but storage broken" pages someone before players notice.
+
+## Polling and capacity
+
+Vercel functions can't hold sockets open, so clients poll `GET /api/rooms/:code?v=<version>`.
+
+- **Unchanged polls are cheap.** Every room write also sets `blobs:ver:<CODE>` (same Lua script, same TTL, so they can't diverge). A poll whose `v` matches it is answered from that one tiny key with `{unchanged:true}`; the room JSON is only read when something changed. Rooms written before this key existed fall back to the full read until their next write.
+- **Cadence** (`pollDelay` in `lib/client/useRoom.ts`): 1.2 s in the lobby, recap, on your own turn, and for the Board; 1.8 s when you're next after the current player; 3 s when waiting on someone else mid-game; 5 s when the tab is hidden or the game has ended (still watching, so a rematch is noticed).
+
+### Expected cost per table-minute
+
+These are **calculated from the cadence above, not measured**: there is no working deployment yet to measure on (JAM-187). Re-measure on a preview deployment once there is one (Vercel function invocations and Webdis ops, for a few minutes of a real game).
+
+Polls per player-minute: 50 (1.2 s), 33 (1.8 s), 20 (3 s).
+
+| Table | Before (function calls = Redis room reads) | After: function calls | After: full room reads | After: version-key reads |
+| --- | --- | --- | --- | --- |
+| 8 players, mid-game | 400 | about 203 (-49%) | about 10-20, one per change | about 185-195 |
+| 4 players, mid-game | 200 | about 123 (-38%) | about 10-20 | about 105-115 |
+
+Add the actions themselves (a call or play is one function call and 1-2 Redis ops) and the bots' `botTurn` requests.
+
+Redis traffic per unchanged poll drops from a full room JSON (a few KB with 8 hands) to a ~10 byte value, so Webdis bandwidth and Cloudflare Access request volume are bounded mostly by the number of function calls above. If usage grows, the next step is server-sent events or a hosted realtime service rather than polling faster.
