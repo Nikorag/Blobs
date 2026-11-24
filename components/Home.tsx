@@ -10,8 +10,8 @@ import { Logo } from "./Logo";
 import { useCosmetics } from "./CosmeticsProvider";
 import { Sheet } from "./Sheet";
 import { StoreSheet } from "./StoreSheet";
+import { SettingsSheet } from "./SettingsSheet";
 import { SoloSetup } from "./SoloSetup";
-import { updateSettings, useSettings } from "@/lib/client/settings";
 import { useSoloSave } from "@/lib/solo/save";
 import { useZonto } from "./ZontoProvider";
 
@@ -25,7 +25,7 @@ export function Home() {
   const [error, setError] = useState<string | null>(null);
   const [showRules, setShowRules] = useState(false);
   const [showSolo, setShowSolo] = useState(false);
-  const settings = useSettings();
+  const [showSettings, setShowSettings] = useState(false);
   const soloSave = useSoloSave();
   const resumable = soloSave && soloSave.room.phase !== "End" ? soloSave : null;
 
@@ -156,8 +156,8 @@ export function Home() {
         <Link href="/board" className="underline-offset-4 hover:underline">
           Open the Board
         </Link>
-        <button role="switch" aria-checked={settings.sound} onClick={() => updateSettings({ sound: !settings.sound })} className="underline-offset-4 hover:underline">
-          Sound: {settings.sound ? "on" : "off"}
+        <button onClick={() => setShowSettings(true)} className="underline-offset-4 hover:underline">
+          Settings
         </button>
         <button onClick={() => setShowStore(true)} className="underline-offset-4 hover:underline">
           Store{cosmetics.status === "ready" && ` · 🪙 ${cosmetics.coins}`}
@@ -184,6 +184,8 @@ export function Home() {
       {showStore && <StoreSheet open onClose={() => setShowStore(false)} />}
 
       {showSolo && <SoloSetup open onClose={() => setShowSolo(false)} playerName={name.trim()} />}
+
+      <SettingsSheet open={showSettings} onClose={() => setShowSettings(false)} />
 
       <Sheet open={showRules} title="How to play" onClose={() => setShowRules(false)}>
         <Rules />
