@@ -29,13 +29,9 @@ Online rooms live in Redis, reached over HTTPS through [Webdis](https://webd.is)
 
 ### Where it runs, who owns it
 
-> **Owner to fill in.** The repo doesn't record these and they must not be guessed.
->
-> - Host / provider of the Webdis + Redis server:
-> - Owner and escalation contact:
-> - Cloudflare Access application and policy name (and which service token Blobs uses):
-> - Redis persistence (RDB/AOF) and `maxmemory` / eviction policy. Rooms are disposable, but an eviction policy that drops keys mid-game would lose live tables, so prefer `noeviction` or a generous limit:
-> - Backups: none needed for rooms (24 h TTL); the host config should be reproducible.
+- **Host:** self-hosted by the project owner at `redis.nikorag.co.uk` (Redis, with Webdis in front for HTTP access).
+- **Owner:** the Zonto Games project owner.
+- **Still to record here (owner):** the Cloudflare Access application/policy and which service token Blobs uses, the Redis persistence (RDB/AOF) and `maxmemory` / eviction settings, and where the host's own config lives. Rooms are disposable (24 h TTL), so no backups are needed, but an eviction policy that drops keys mid-game would lose live tables: prefer `noeviction` or a generous limit.
 
 ### Rotating credentials
 
