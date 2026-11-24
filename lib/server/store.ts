@@ -11,6 +11,8 @@ interface Store {
   incr(counter: string, ttlSeconds: number): Promise<number>;
   /** Current value of a counter (0 if unset or expired). */
   peek(counter: string): Promise<number>;
+  /** Round-trip to the backend, failing fast. Which backend this is, for the health check. */
+  ping(timeoutMs: number): Promise<"webdis" | "memory">;
 }
 
 const CAS_SCRIPT = `
@@ -60,8 +62,9 @@ function webdisStore(rawUrl: string): Store {
   }
   const endpoint = url.toString();
 
-  async function command(...args: (string | number)[]): Promise<unknown> {
+  async function command(timeoutMs: number | null, ...args: (string | number)[]): Promise<unknown> {
     const name = String(args[0]);
+    const signal = timeoutMs === null ? undefined : AbortSignal.timeout(timeoutMs);
     let res: Response;
     try {
       res = await fetch(endpoint, {
@@ -70,6 +73,7 @@ function webdisStore(rawUrl: string): Store {
         body: args.map((a) => encodeURIComponent(String(a))).join("/"),
         cache: "no-store",
         redirect: "manual",
+        signal,
       });
     } catch (err) {
       const cause = (err as { cause?: { code?: string } }).cause?.code ?? (err as Error).message;
@@ -97,18 +101,22 @@ function webdisStore(rawUrl: string): Store {
 
   return {
     async get(code) {
-      const raw = await command("GET", key(code));
+      const raw = await command(null, "GET", key(code));
       return typeof raw === "string" ? (JSON.parse(raw) as Room) : null;
     },
     async put(room, expectedVersion) {
-      const ok = await command("EVAL", CAS_SCRIPT, 1, key(room.code), expectedVersion, JSON.stringify(room), TTL_SECONDS);
+      const ok = await command(null, "EVAL", CAS_SCRIPT, 1, key(room.code), expectedVersion, JSON.stringify(room), TTL_SECONDS);
       return ok === 1;
     },
     async incr(counter, ttlSeconds) {
-      return Number(await command("EVAL", INCR_SCRIPT, 1, `blobs:rl:${counter}`, ttlSeconds));
+      return Number(await command(null, "EVAL", INCR_SCRIPT, 1, `blobs:rl:${counter}`, ttlSeconds));
     },
     async peek(counter) {
-      return Number((await command("GET", `blobs:rl:${counter}`)) ?? 0);
+      return Number((await command(null, "GET", `blobs:rl:${counter}`)) ?? 0);
+    },
+    async ping(timeoutMs) {
+      await command(timeoutMs, "PING");
+      return "webdis";
     },
   };
 }
@@ -133,6 +141,9 @@ function memoryStore(): Store {
     async peek(counter) {
       return live(counter)?.n ?? 0;
     },
+    async ping() {
+      return "memory";
+    },
     async get(code) {
       const hit = rooms.get(code);
       if (!hit) return null;
@@ -155,10 +166,12 @@ function memoryStore(): Store {
 function createStore(): Store {
   const url = process.env.WEBDIS_URL;
   if (url) return webdisStore(url);
+  // In production, memory would silently split players across serverless instances. Fail loudly instead.
+  if (process.env.VERCEL_ENV === "production") {
+    throw new StoreError("WEBDIS_URL is not set, so online games have nowhere to store rooms. Set it in the Vercel project's production environment.");
+  }
   if (process.env.VERCEL) {
-    console.warn(
-      "[blobs] WEBDIS_URL is not set. Using in-memory storage, which will not work reliably on Vercel.",
-    );
+    console.warn("[blobs] WEBDIS_URL is not set. Using in-memory storage, which only works within one instance (fine for a preview).");
   }
   return memoryStore();
 }
@@ -171,6 +184,7 @@ export const store: Store = {
   put: (room, expected) => backend().put(room, expected),
   incr: (counter, ttl) => backend().incr(counter, ttl),
   peek: (counter) => backend().peek(counter),
+  ping: (timeoutMs) => backend().ping(timeoutMs),
 };
 
 export class ConflictError extends Error {}
