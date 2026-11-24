@@ -10,6 +10,7 @@ import { Logo } from "./Logo";
 import { useCosmetics } from "./CosmeticsProvider";
 import { Sheet } from "./Sheet";
 import { StoreSheet } from "./StoreSheet";
+import { SettingsSheet } from "./SettingsSheet";
 import { SoloSetup } from "./SoloSetup";
 import { clearSolo, useSoloSave, useSoloSaveBroken } from "@/lib/solo/save";
 import { useZonto } from "./ZontoProvider";
@@ -24,6 +25,7 @@ export function Home() {
   const [error, setError] = useState<string | null>(null);
   const [showRules, setShowRules] = useState(false);
   const [showSolo, setShowSolo] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const soloSave = useSoloSave();
   const soloBroken = useSoloSaveBroken();
 
@@ -165,6 +167,9 @@ export function Home() {
         <Link href="/board" className="underline-offset-4 hover:underline">
           Open the Board
         </Link>
+        <button onClick={() => setShowSettings(true)} className="underline-offset-4 hover:underline">
+          Settings
+        </button>
         <Link href="/privacy" className="underline-offset-4 hover:underline">
           Privacy
         </Link>
@@ -193,6 +198,8 @@ export function Home() {
       {showStore && <StoreSheet open onClose={() => setShowStore(false)} />}
 
       {showSolo && <SoloSetup open onClose={() => setShowSolo(false)} playerName={name.trim()} />}
+
+      <SettingsSheet open={showSettings} onClose={() => setShowSettings(false)} />
 
       <Sheet open={showRules} title="How to play" onClose={() => setShowRules(false)}>
         <Rules />

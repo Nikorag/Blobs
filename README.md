@@ -60,7 +60,12 @@ Redis (via Webdis) is required in production: serverless functions don't share m
 | API: create / join / poll / act | `app/api/rooms/` |
 | Polling + actions hook | `lib/client/useRoom.ts` |
 | UI | `components/`, `app/` |
+| Sound effects and the mute setting | `lib/client/audio.ts`, `lib/client/settings.ts` |
 
 The original version used Socket.IO and a single in-memory game. Vercel functions can't hold WebSocket connections or share memory, so this version instead stores each room in Redis and clients poll `GET /api/rooms/:code?v=<version>` about once a second. If nothing changed the server answers with a tiny `{ unchanged: true }`. Actions are `POST /api/rooms/:code/action`, validated by the engine, and each player only ever receives their own hand.
 
 The "next round" timer and trick resolution are modelled as game state rather than server timeouts (which can't exist on serverless): a finished trick stays on the table until the winner leads, and the recap advances when everyone taps continue or when its countdown expires.
+
+## Sound
+
+All sound effects are synthesised in the browser with the Web Audio API (`lib/client/audio.ts`): a few oscillator notes per event. There are **no audio files**, so nothing is downloaded and there are no third-party assets or licences to track. Sound starts after the first tap (browsers require a gesture), is off while the tab is hidden, and can be muted from the home footer or the in-game menu; the choice is kept in local storage.
