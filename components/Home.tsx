@@ -11,7 +11,7 @@ import { useCosmetics } from "./CosmeticsProvider";
 import { Sheet } from "./Sheet";
 import { StoreSheet } from "./StoreSheet";
 import { SoloSetup } from "./SoloSetup";
-import { useSoloSave } from "@/lib/solo/save";
+import { clearSolo, useSoloSave, useSoloSaveBroken } from "@/lib/solo/save";
 import { useZonto } from "./ZontoProvider";
 
 export function Home() {
@@ -25,6 +25,8 @@ export function Home() {
   const [showRules, setShowRules] = useState(false);
   const [showSolo, setShowSolo] = useState(false);
   const soloSave = useSoloSave();
+  const soloBroken = useSoloSaveBroken();
+
   const resumable = soloSave && soloSave.room.phase !== "End" ? soloSave : null;
 
   const [showAchievements, setShowAchievements] = useState(false);
@@ -139,6 +141,15 @@ export function Home() {
             {busy === "join" ? "…" : "Join"}
           </button>
         </form>
+
+        {soloBroken && (
+          <p role="status" className="rounded-xl bg-white/10 px-3 py-2 text-center text-sm font-semibold text-muted">
+            Your saved CPU game is damaged and can&apos;t be resumed.{" "}
+            <button onClick={clearSolo} className="text-accent underline underline-offset-4">
+              Clear it
+            </button>
+          </p>
+        )}
 
         {error && (
           <p role="alert" className="rounded-xl bg-bad/15 px-3 py-2 text-center text-sm font-semibold text-bad">
