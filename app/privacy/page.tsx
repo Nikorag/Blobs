@@ -30,7 +30,7 @@ const sections: { title: string; body: React.ReactNode }[] = [
     title: "Where it is stored and for how long",
     body: (
       <p>
-        Online game state is held in a Redis database, reached through a service called Webdis, and is deleted automatically 24 hours after the table was last
+        Online game state is held in a Redis database that we host ourselves (reached through a service called Webdis), and is deleted automatically 24 hours after the table was last
         used. The site itself is hosted on Vercel. We don&apos;t use analytics or advertising in Blobs.
       </p>
     ),
