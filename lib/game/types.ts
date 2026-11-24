@@ -66,6 +66,8 @@ export interface Room {
   /** ms epoch at which the recap auto-advances */
   recapAt: number | null;
   recapReady: string[];
+  /** ms epoch of the last call, play or deal. The server paces computer players from it. */
+  moveAt?: number;
   /** Each player's latest emote (absent on rooms created before emotes existed). */
   emotes?: Record<string, { emote: EmoteId; at: number }>;
   /** What the computer players remember of the round (public information only). Never sent to clients. */
