@@ -1,5 +1,6 @@
 import { toView } from "@/lib/game/engine";
 import { errorResponse, ForbiddenError, notFound, playerIdFrom } from "@/lib/server/http";
+import { missesExhausted, recordMiss, tooMany } from "@/lib/server/rateLimit";
 import { normaliseCode, store } from "@/lib/server/store";
 
 /**
@@ -11,6 +12,7 @@ import { normaliseCode, store } from "@/lib/server/store";
  */
 export async function GET(request: Request, ctx: RouteContext<"/api/rooms/[code]">) {
   try {
+    if (await missesExhausted(request)) return tooMany();
     const { code } = await ctx.params;
     const url = new URL(request.url);
     const board = url.searchParams.get("board") === "1";
@@ -18,7 +20,10 @@ export async function GET(request: Request, ctx: RouteContext<"/api/rooms/[code]
     const seen = Number(url.searchParams.get("v") ?? -1);
 
     const room = await store.get(normaliseCode(code));
-    if (!room) return notFound();
+    if (!room) {
+      await recordMiss(request);
+      return notFound();
+    }
     if (!board && !room.players.some((p) => p.id === playerId)) {
       throw new ForbiddenError("You are not in this room");
     }

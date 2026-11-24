@@ -7,6 +7,10 @@ interface Store {
   get(code: string): Promise<Room | null>;
   /** Write `room` only if the stored version still equals `expectedVersion` (0 = must not exist). */
   put(room: Room, expectedVersion: number): Promise<boolean>;
+  /** Add one to a counter that expires `ttlSeconds` after its first increment; returns the new count. */
+  incr(counter: string, ttlSeconds: number): Promise<number>;
+  /** Current value of a counter (0 if unset or expired). */
+  peek(counter: string): Promise<number>;
 }
 
 const CAS_SCRIPT = `
@@ -18,6 +22,12 @@ elseif tonumber(ARGV[1]) ~= 0 then
 end
 redis.call('SET', KEYS[1], ARGV[2], 'EX', ARGV[3])
 return 1
+`;
+
+const INCR_SCRIPT = `
+local n = redis.call('INCR', KEYS[1])
+if n == 1 then redis.call('EXPIRE', KEYS[1], ARGV[1]) end
+return n
 `;
 
 /**
@@ -94,6 +104,12 @@ function webdisStore(rawUrl: string): Store {
       const ok = await command("EVAL", CAS_SCRIPT, 1, key(room.code), expectedVersion, JSON.stringify(room), TTL_SECONDS);
       return ok === 1;
     },
+    async incr(counter, ttlSeconds) {
+      return Number(await command("EVAL", INCR_SCRIPT, 1, `blobs:rl:${counter}`, ttlSeconds));
+    },
+    async peek(counter) {
+      return Number((await command("GET", `blobs:rl:${counter}`)) ?? 0);
+    },
   };
 }
 
@@ -101,7 +117,22 @@ function webdisStore(rawUrl: string): Store {
 function memoryStore(): Store {
   const g = globalThis as unknown as { __blobsRooms?: Map<string, { json: string; exp: number }> };
   const rooms = (g.__blobsRooms ??= new Map());
+  const counters = new Map<string, { n: number; exp: number }>();
+  const live = (counter: string) => {
+    const hit = counters.get(counter);
+    if (hit && hit.exp < Date.now()) counters.delete(counter);
+    return counters.get(counter);
+  };
   return {
+    async incr(counter, ttlSeconds) {
+      const hit = live(counter) ?? { n: 0, exp: Date.now() + ttlSeconds * 1000 };
+      hit.n += 1;
+      counters.set(counter, hit);
+      return hit.n;
+    },
+    async peek(counter) {
+      return live(counter)?.n ?? 0;
+    },
     async get(code) {
       const hit = rooms.get(code);
       if (!hit) return null;
@@ -138,6 +169,8 @@ const backend = () => (g.__blobsStore ??= createStore());
 export const store: Store = {
   get: (code) => backend().get(code),
   put: (room, expected) => backend().put(room, expected),
+  incr: (counter, ttl) => backend().incr(counter, ttl),
+  peek: (counter) => backend().peek(counter),
 };
 
 export class ConflictError extends Error {}
@@ -171,7 +204,15 @@ const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ";
 
 export function randomCode(): string {
   let out = "";
-  for (let i = 0; i < 4; i++) out += CODE_ALPHABET[Math.floor(Math.random() * CODE_ALPHABET.length)];
+  const bytes = new Uint8Array(16);
+  // Rejection sampling keeps every letter equally likely (256 isn't a multiple of 24).
+  const limit = 256 - (256 % CODE_ALPHABET.length);
+  while (out.length < 4) {
+    crypto.getRandomValues(bytes);
+    for (const b of bytes) {
+      if (b < limit && out.length < 4) out += CODE_ALPHABET[b % CODE_ALPHABET.length];
+    }
+  }
   return out;
 }
 
