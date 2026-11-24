@@ -1,25 +1,26 @@
 import { toView } from "@/lib/game/engine";
-import { errorResponse, notFound } from "@/lib/server/http";
+import { errorResponse, ForbiddenError, notFound, playerIdFrom } from "@/lib/server/http";
 import { normaliseCode, store } from "@/lib/server/store";
 
 /**
  * Poll for room state. Pass `v` (the last version seen) and, if nothing changed, we
  * reply with a tiny `{ unchanged: true }` instead of the whole view.
  *
- * `board=1` is the spectator view used by The Board: no player id needed, and no hands.
+ * `board=1` is the spectator view used by The Board: no credentials needed, and no hands.
+ * Everyone else authenticates with their secret in the `x-player-secret` header.
  */
 export async function GET(request: Request, ctx: RouteContext<"/api/rooms/[code]">) {
   try {
     const { code } = await ctx.params;
     const url = new URL(request.url);
     const board = url.searchParams.get("board") === "1";
-    const playerId = board ? "" : (url.searchParams.get("pid") ?? "");
+    const playerId = board ? "" : playerIdFrom(request);
     const seen = Number(url.searchParams.get("v") ?? -1);
 
     const room = await store.get(normaliseCode(code));
     if (!room) return notFound();
     if (!board && !room.players.some((p) => p.id === playerId)) {
-      return Response.json({ error: "You are not in this room" }, { status: 403 });
+      throw new ForbiddenError("You are not in this room");
     }
     const headers = { "Cache-Control": "no-store" };
     if (room.version === seen) return Response.json({ unchanged: true, now: Date.now() }, { headers });

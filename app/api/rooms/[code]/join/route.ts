@@ -6,7 +6,7 @@ export async function POST(request: Request, ctx: RouteContext<"/api/rooms/[code
   try {
     const { code } = await ctx.params;
     const body = await readJson(request);
-    const playerId = playerIdFrom(body.playerId);
+    const playerId = playerIdFrom(request);
     const name = typeof body.name === "string" ? body.name : "";
     const outcome = await mutateRoom(normaliseCode(code), (room) => joinRoom(room, playerId, name));
     if (!outcome) return notFound();
