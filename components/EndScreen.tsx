@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { play } from "@/lib/client/audio";
 import { vibrate } from "@/lib/client/identity";
 import type { RoomHandle } from "@/lib/client/roomHandle";
 import type { RoomView } from "@/lib/game/types";
@@ -21,7 +22,10 @@ export function EndScreen({ room, view }: { room: Room; view: RoomView }) {
   const coins = useCoinReward(view);
 
   useEffect(() => {
-    if (iWon) vibrate([100, 50, 100, 50, 300]);
+    if (iWon) {
+      vibrate([100, 50, 100, 50, 300]);
+      play("gameWin");
+    }
   }, [iWon]);
 
   return (

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fredoka } from "next/font/google";
+import { AudioUnlock } from "@/components/AudioUnlock";
 import { CosmeticsProvider } from "@/components/CosmeticsProvider";
 import { GamepadNavigator } from "@/components/GamepadNavigator";
 import { StudioSplash } from "@/components/StudioSplash";
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <StudioSplash>{children}</StudioSplash>
           </CosmeticsProvider>
           <GamepadNavigator />
+          <AudioUnlock />
         </ZontoProvider>
       </body>
     </html>

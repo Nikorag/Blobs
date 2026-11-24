@@ -11,6 +11,7 @@ import { useCosmetics } from "./CosmeticsProvider";
 import { Sheet } from "./Sheet";
 import { StoreSheet } from "./StoreSheet";
 import { SoloSetup } from "./SoloSetup";
+import { updateSettings, useSettings } from "@/lib/client/settings";
 import { useSoloSave } from "@/lib/solo/save";
 import { useZonto } from "./ZontoProvider";
 
@@ -24,6 +25,7 @@ export function Home() {
   const [error, setError] = useState<string | null>(null);
   const [showRules, setShowRules] = useState(false);
   const [showSolo, setShowSolo] = useState(false);
+  const settings = useSettings();
   const soloSave = useSoloSave();
   const resumable = soloSave && soloSave.room.phase !== "End" ? soloSave : null;
 
@@ -154,6 +156,9 @@ export function Home() {
         <Link href="/board" className="underline-offset-4 hover:underline">
           Open the Board
         </Link>
+        <button role="switch" aria-checked={settings.sound} onClick={() => updateSettings({ sound: !settings.sound })} className="underline-offset-4 hover:underline">
+          Sound: {settings.sound ? "on" : "off"}
+        </button>
         <button onClick={() => setShowStore(true)} className="underline-offset-4 hover:underline">
           Store{cosmetics.status === "ready" && ` · 🪙 ${cosmetics.coins}`}
         </button>

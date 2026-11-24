@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { sameCard } from "@/lib/game/cards";
+import { play as playSound } from "@/lib/client/audio";
 import { vibrate } from "@/lib/client/identity";
+import { updateSettings, useSettings } from "@/lib/client/settings";
 import type { RoomHandle } from "@/lib/client/roomHandle";
 import type { Card, PlayedCard, PublicPlayer, RoomView } from "@/lib/game/types";
 import { Avatar } from "./Avatar";
@@ -22,6 +24,7 @@ const TRUMP_FLY_MS = 600;
 
 export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
   const cosmetics = useCosmetics();
+  const settings = useSettings();
   const [scoresOpen, setScoresOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [tapped, setTapped] = useState<Card | null>(null);
@@ -48,6 +51,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
   useEffect(() => {
     if (myTurn && !wasMyTurn.current) {
       vibrate([180, 60, 180]);
+      playSound("yourTurn");
       setBanner(view.phase === "Call" ? "Your call!" : "Your turn!");
       const t = setTimeout(() => setBanner(null), 2600);
       wasMyTurn.current = true;
@@ -55,6 +59,14 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
     }
     if (!myTurn) wasMyTurn.current = false;
   }, [myTurn, view.phase]);
+
+  // A click for every card that lands on the table, whoever played it.
+  const tableCount = view.trick.length;
+  const seenCount = useRef(tableCount);
+  useEffect(() => {
+    if (tableCount > seenCount.current) playSound("cardPlay");
+    seenCount.current = tableCount;
+  }, [tableCount]);
 
   useEffect(() => {
     if (!myTurn) {
@@ -88,6 +100,7 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
       setSweepTo(next);
       setStage("sweep");
       vibrate(winnerId === view.you ? [30, 40, 30] : 12);
+      playSound(winnerId === view.you ? "trickWin" : "trickLost");
     }, 1600);
     const t2 = setTimeout(() => setStage("done"), 1600 + 550);
     return () => {
@@ -351,6 +364,14 @@ export function GameScreen({ room, view }: { room: Room; view: RoomView }) {
               Game code <b className="tracking-[0.3em] text-ink">{view.code}</b>
             </p>
           )}
+          <button
+            role="switch"
+            aria-checked={settings.sound}
+            className="btn btn-ghost w-full"
+            onClick={() => updateSettings({ sound: !settings.sound })}
+          >
+            Sound: {settings.sound ? "on" : "off"}
+          </button>
           {room.solo ? (
             <button
               className="btn btn-danger w-full"
