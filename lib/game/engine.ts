@@ -96,6 +96,7 @@ function startRound(room: Room, ctx: Ctx): void {
   room.lastTrick = null;
   room.recapAt = null;
   room.recapReady = [];
+  room.moveAt = ctx.now;
   // The player after the dealer calls first; the dealer calls last.
   room.turnIdx = (room.dealerIdx + 1) % room.players.length;
 }
@@ -221,6 +222,7 @@ export function applyAction(room: Room, playerId: string, action: Action, ctx: C
         fail("The dealer can't make the total equal the number of tricks");
       }
       room.calls[playerId] = value;
+      room.moveAt = ctx.now;
       if (Object.keys(room.calls).length === room.players.length) {
         room.phase = "Play";
         room.turnIdx = (room.dealerIdx + 1) % room.players.length;
@@ -240,6 +242,7 @@ export function applyAction(room: Room, playerId: string, action: Action, ctx: C
         fail("You must follow suit");
       }
       if (room.trick.length === 0) room.lastTrick = null;
+      room.moveAt = ctx.now;
       room.trick.push({ card, playerId });
       player.hand = player.hand.filter((c) => !sameCard(c, card));
 

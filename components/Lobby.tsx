@@ -122,23 +122,24 @@ export function Lobby({ room, view }: { room: Room; view: RoomView }) {
             <li key={p.id} className="glass flex items-center gap-3 rounded-2xl p-3">
               <Avatar look={p.look} />
               <div className="min-w-0 flex-1">
-                <p className="truncate font-bold">{p.name}</p>
+                {/* Your own name wraps rather than truncating, so you can always confirm what others see. */}
+                <p className={p.id === view.you ? "break-words font-bold leading-tight" : "truncate font-bold"}>{p.name}</p>
                 <p className="text-xs font-semibold text-muted">
                   {p.isHost && <span className="text-accent">Host</span>}
                   {p.isHost && p.id === view.you && " · "}
                   {p.id === view.you && "You"}
                 </p>
+                {p.id === view.you && (
+                  <div className="mt-1.5 flex gap-2">
+                    <button onClick={() => setDesigning(true)} className="min-h-10 min-w-10 rounded-full bg-surface2 px-4 text-xs font-bold">
+                      Blob
+                    </button>
+                    <button onClick={() => setEditing(true)} className="min-h-10 min-w-10 rounded-full bg-surface2 px-4 text-xs font-bold">
+                      Rename
+                    </button>
+                  </div>
+                )}
               </div>
-              {p.id === view.you && (
-                <>
-                  <button onClick={() => setDesigning(true)} className="rounded-full bg-surface2 px-3 py-1.5 text-xs font-bold">
-                    Blob
-                  </button>
-                  <button onClick={() => setEditing(true)} className="rounded-full bg-surface2 px-3 py-1.5 text-xs font-bold">
-                    Rename
-                  </button>
-                </>
-              )}
               {isHost && p.id !== view.you && (
                 <button onClick={() => room.act({ type: "kick", targetId: p.id })} aria-label={`Remove ${p.name}`} className="grid size-8 place-items-center rounded-full bg-bad/15 text-bad">
                   ×
