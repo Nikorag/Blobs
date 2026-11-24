@@ -195,6 +195,7 @@ export function Rules() {
         ["Call", "Before play, everyone says how many tricks they'll win. The dealer calls last and can't make the total equal the number of tricks, so someone is always wrong."],
         ["Play", "The player after the dealer leads. You must follow suit if you can. Highest card of the led suit wins, but any trump beats it. Winner leads next."],
         ["Score", "Hit your call exactly and you score that number. Miss — over or under — and you're blobbed for −1."],
+        ["Taking too long?", "In an online game you have 60 seconds per turn. A countdown shows for the last 15, then the table can play a sensible move for you. Miss two turns in a row and the game plays your seat until you tap back in; the next time you play, it's yours again."],
       ].map(([title, body], i) => (
         <li key={title} className="flex gap-3">
           <span className="grid size-7 shrink-0 place-items-center rounded-full bg-accent text-sm font-black text-accent-ink">{i + 1}</span>
